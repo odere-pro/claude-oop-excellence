@@ -1,58 +1,160 @@
 ---
 name: audit
 description: >-
-  Use before releases, after large PRs, or during onboarding to run a full multi-domain quality and
-  risk audit. Delegates to the risk-scanner orchestrator, which fans out the antipattern scanners
-  (code, architecture, OOP, testing, concurrency, database, security, dependency), deduplicates,
-  scores, and returns one unified, severity-ranked report. Language-agnostic; supports selecting
-  domains and scope.
-argument-hint: '[code arch oop test concurrency db security deps | all] [full | changed | component <path>]'
+  Use before releases, after large PRs, or during onboarding to run a single read-only analysis of a
+  codebase's quality, risk, and design. The one analysis front door. Reads the glossary to resolve a
+  selector that zooms across three layers — track, aspect, family/category/entity — then delegates to
+  the oop-orchestrator in analyze mode (both the RISK track and the PATTERN track in parallel) or a
+  narrower mode for a track/aspect selector. The orchestrator fans out one worker per in-scope entity
+  in parallel, batched by family, and returns ONE unified report: risk findings (matrix, hotspots,
+  correlations, score), Patterns Present, Pattern Opportunities, and a Recommended Actions handoff
+  printing the exact gated commands to run next. Language-agnostic; select by track, aspect, category,
+  family, or entity id, in any scope.
+argument-hint: '[full | changed | component <path> | risks | patterns | pattern-scan | pattern-fit | <category> | <family> | <entity-id>] [full | changed | component <path>]'
 user-invocable: true
 ---
 
-# Quality & Risk Audit
+# Quality, Risk & Design Audit
 
-The single entry point for scanning a codebase. This skill delegates the heavy lifting to the
-`risk-scanner` orchestrator agent (which runs each domain scanner in its own context, in parallel)
-and returns one unified, severity-ranked report. It assumes nothing about the language or stack.
+`/audit` is **THE** read-only analysis entry point for this plugin. It subsumes every separate
+analysis path — there is one front door, one selector grammar, and one unified report. It resolves a
+selector against the glossary, delegates the heavy lifting to the `oop-orchestrator`, and returns a
+single merged report. It assumes nothing about the language or stack and never modifies code.
+
+The plugin organizes analysis across **two tracks** and zooms through **three layers** —
+**track → aspect → family / category / entity**:
+
+- **RISK track** — find problems: code smells, antipatterns, vulnerabilities, supply-chain risks.
+- **PATTERN track** — work with design patterns: detect patterns already present (`pattern-scan`)
+  and suggest the most-suitable patterns where one would help (`pattern-fit`).
+
+A full `/audit` runs **both tracks in parallel** and merges them into ONE report.
+
+## Selector grammar
+
+```
+/audit [full | changed | component <path>]            → L1: both tracks, in parallel, one report
+/audit risks [scope]                                  → L2: RISK track only
+/audit patterns [scope]                               → L2: PATTERN track (scan + fit)
+/audit pattern-scan [scope]                           → aspect: patterns already present
+/audit pattern-fit [scope]                            → aspect: most-suitable pattern suggestions
+/audit <category> [scope]                             → one issue/pattern category
+/audit <family> [scope]                               → one family of issues or patterns
+/audit <entity-id> [scope]                            → one entity or pattern
+```
+
+Every form takes an optional **scope** suffix — `full` (default), `changed`, or `component <path>`.
+
+### What to look for (selector, default = both tracks)
+
+The glossary is the single source of truth for what the plugin recognizes. A selector resolves
+against it, zooming from the broadest layer (a whole track) to the narrowest (one entity):
+
+- **`full` / `changed` / `component <path>` / none** — the **L1 full run**: the RISK track and the
+  PATTERN track dispatched **in parallel**, merged into one unified report. (A bare scope word with
+  no selector is the full run scoped accordingly.)
+- **`risks`** — the **RISK track only**: every issue family (`oop`, `code`, `architecture`,
+  `testing`, `concurrency`, `database`, `security`, `dependency`).
+- **`patterns`** — the **PATTERN track**: both aspects, `pattern-scan` + `pattern-fit`.
+- **`pattern-scan`** — one aspect: design patterns **already present** in the code.
+- **`pattern-fit`** — one aspect: the **most-suitable** patterns where one would help.
+- **`<category>`** — one category of entities (e.g. `vulnerability`, `antipattern`, `code-smell`,
+  `supply-chain-risk`, `design-pattern`).
+- **`<family>`** — one family of issues or patterns (e.g. `oop`, `security`, `behavioral`). `oop` is
+  the spine of this plugin — it surfaces whenever class/struct/interface declarations are present.
+- **`<entity-id>`** — a single glossary entity or pattern, by its stable id (e.g. `god-class`,
+  `feature-envy`, `strategy`).
+
+### Where to look (scope, default `full`)
+
+- **`full`** — the whole project (default).
+- **`changed`** — only files changed versus the base branch.
+- **`component <path>`** — a single subtree (a directory or file set).
 
 ## Workflow
 
 ### 1. Parse arguments
 
-Read `$ARGUMENTS`:
+Read `$ARGUMENTS` into a **selector** (a track, aspect, category, family, or entity id — default the
+full run across both tracks) and a **scope** (`full`, `changed`, or `component <path>` — default
+`full`).
 
-- **Domains** (default `all`): any of `code`, `arch`, `oop`, `test`, `concurrency`, `db`,
-  `security`, `deps`. OOP is always included when classes/structs/interfaces are present — it is the
-  spine of this plugin.
-- **Scope** (default `full`): `full` (whole project), `changed` (files changed vs the base branch),
-  or `component <path>` (a directory or file set).
+### 2. Resolve the selector against the glossary
 
-### 2. Delegate to the orchestrator
+The glossary (`skills/glossary/glossary.json`, surfaced by the `glossary` skill) is the single source
+of truth, and its selector table is canonical. Resolving means zooming down through the layers:
 
-Invoke the `risk-scanner` agent with the Agent tool. Pass a prompt containing the selected domains
-and scope, for example:
+- a **track** (`risks` / `patterns`) implies its aspects, families, and entities,
+- an **aspect** (`pattern-scan` / `pattern-fit`) implies its families and entities,
+- a **category** maps to every entity of that category,
+- a **family** maps to every entity in that family,
+- an **`<entity-id>`** maps to that one entity record,
+- the **full run** maps to every in-scope entity across both tracks.
 
-- Default / all: `"Scan scope: full. Scanners: all. Verbose mode: ON — report all findings across every severity (critical, high, medium, low); do not cap or truncate."`
-- Targeted: `"Scan scope: component src/api. Scanners: oop, security."`
+You do not enumerate entities yourself — pass the selector through and let the `oop-orchestrator`
+read the glossary and resolve it. Each entity carries language-neutral `signs` and an `applies_when`
+precondition, so the analysis stays principle-driven rather than tied to file-extension globs or a
+specific language's type-checker. The patterns catalog lives at `skills/glossary/PATTERNS.md`; the
+glossary itself remains the canonical registry of every entity.
 
-`risk-scanner` handles applicability filtering, parallel dispatch, deduplication, weighted scoring,
-and cross-domain correlation.
+### 3. Delegate to the orchestrator (read-only)
 
-### 3. Return the report
+Invoke the `oop-orchestrator` agent with the Agent tool. The selector chooses the mode:
 
-Return the orchestrator's unified report to the user verbatim. Then recommend next steps:
+- **Full run** (no selector, or just a scope) → **`analyze`** super-mode: both tracks in parallel.
+- **`risks`** → **`validate`/`detect`** mode (RISK track).
+- **`patterns`** → both pattern aspects.
+- **`pattern-scan`** / **`pattern-fit`** → that single aspect.
+- **`<category>` / `<family>` / `<entity-id>`** → the narrower mode for that track's aspect, scoped
+  to the resolved entities.
 
-- `/improve <domain>` — fix the highest-severity domain (OOP first when present).
-- `/risk-report` — save a timestamped copy of this report under `tmp/` before changing anything.
-- `/fix-risks` — work through a saved report domain by domain.
+Pass a prompt containing the mode, the selector, and the scope, for example:
+
+- Full run: `"Mode: analyze. Selection: all. Scope: full. Verbose mode: ON — report all findings across every severity (critical, high, medium, low); do not cap or truncate."`
+- Risk track: `"Mode: validate. Selection: risks. Scope: changed."`
+- Pattern track: `"Mode: analyze (pattern track). Selection: patterns. Scope: component src/."`
+- Single aspect: `"Mode: pattern-scan. Selection: pattern-scan. Scope: full."`
+- Family: `"Mode: validate. Selection: oop. Scope: component src/domain."`
+- Single entity: `"Mode: validate. Selection: god-class. Scope: component src/."`
+
+The `oop-orchestrator` reads the glossary, resolves the selector to the in-scope entities per track,
+applies each entity's `applies_when` smart-dispatch check (explicit selectors override skips),
+dispatches **one worker per entity in parallel, batched by family**, then deduplicates, computes the
+weighted risk score, and detects cross-domain correlations. The whole analysis path is read-only.
+
+### 4. Return the unified report
+
+Return the orchestrator's unified report to the user verbatim — scoring, dedup, correlation, and the
+action handoff are already applied. In a full run the report carries:
+
+- **Risk findings** — a severity matrix, hotspots (modules with findings from 3+ families),
+  cross-domain correlations, and a weighted **risk score** with verdict.
+- **Patterns Present** — design patterns already realized in the code (from the PATTERN track's scan).
+- **Pattern Opportunities** — where adopting a pattern would help (from the PATTERN track's fit).
+- **Recommended Actions** — the audit → action handoff: the exact **gated** commands to run next,
+  scoped to the findings, printed with real selectors and real paths:
+  - `/fix-risks <selector> [scope]` — fix a risk-finding cluster.
+  - `/implement-patterns <selector> [scope]` — adopt a suggested pattern where it fits.
+
+A narrower selector returns only the relevant sections (risk-only, scan-only, or fit-only), with
+Recommended Actions scoped to whatever was found.
+
+## Universality
+
+This audit is principle- and sign-driven, never per-language. There is no per-language matrix and no
+hardcoded type-checker: the orchestrator detects the languages in play from the file manifest, and
+each worker applies its own language judgment to the language-neutral `signs` and design principles
+carried in the entity record. The same selectors work on any stack.
 
 ## Usage
 
 ```
-/audit
-/audit all
-/audit oop security
-/audit code oop changed
-/audit oop component src/domain
+/audit                              # full run: both tracks in parallel, one unified report
+/audit risks                        # RISK track only
+/audit patterns                     # PATTERN track: scan + fit
+/audit pattern-scan                 # design patterns already present
+/audit oop                          # the OOP family of issues
+/audit god-class component src/     # one entity, scoped to a subtree
+/audit strategy                     # one design pattern (present + fit)
+/audit changed                      # full run, only files changed vs the base branch
 ```
