@@ -1,0 +1,13 @@
+version: 2
+
+# The skeleton's only versioned dependencies are the GitHub Actions in .github/workflows, pinned by
+# commit SHA. Dependabot bumps the pin and the trailing `# vX.Y.Z` comment together. Add an `npm`
+# block here if you later add a package.json for doc linting. See the cookbook's
+# 14-supply-chain-and-governance.
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"

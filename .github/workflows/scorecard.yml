@@ -1,0 +1,42 @@
+name: scorecard
+
+# OpenSSF Scorecard. DORMANT by default: it runs only on manual dispatch, because Scorecard publishes
+# to a public API and uploads SARIF to code-scanning — which require the repo to be PUBLIC. Once your
+# repo is public, uncomment the schedule/push/branch_protection_rule triggers below to activate it and
+# render the README badge. See the cookbook's 14-supply-chain-and-governance.
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "27 4 * * 1" # weekly, Monday 04:27 UTC
+  # push:
+  #   branches: ["main"]
+  # branch_protection_rule:
+
+permissions: read-all
+
+jobs:
+  analysis:
+    name: scorecard analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+
+      - name: Upload to code-scanning
+        uses: github/codeql-action/upload-sarif@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
+        with:
+          sarif_file: results.sarif

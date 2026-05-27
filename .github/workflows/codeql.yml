@@ -1,0 +1,38 @@
+name: codeql
+
+# CodeQL SAST over the `actions` language (a content-only plugin has no compiled code, so this scans
+# the workflow YAML itself). DORMANT by default: uploading results to code-scanning requires a PUBLIC
+# repo (or GitHub Advanced Security). Once your repo is public, uncomment the push/pull_request/schedule
+# triggers to activate it. See the cookbook's 14-supply-chain-and-governance.
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: ["main"]
+  # pull_request:
+  #   branches: ["main"]
+  # schedule:
+  #   - cron: "27 4 * * 1" # weekly, Monday 04:27 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: analyze (actions)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
+        with:
+          languages: actions
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0

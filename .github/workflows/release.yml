@@ -1,0 +1,51 @@
+name: release
+
+# A "release" is a git tag + a GitHub Release; the version of record is .claude-plugin/plugin.json.
+# Fires only when you push a `v*` tag (a deliberate act), verifies the tag matches the manifest, runs
+# your gate suite if present, and publishes the Release. See the cookbook's
+# 14-supply-chain-and-governance for the SLSA provenance add-on (omitted here to keep the starter
+# minimal) and docs/RELEASING.md for the procedure.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub Release
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Verify tag matches plugin.json version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          manifest="$(jq -r '.version' .claude-plugin/plugin.json)"
+          echo "tag=$tag  plugin.json=$manifest"
+          if [ "$tag" != "$manifest" ]; then
+            echo "::error::tag v$tag does not match plugin.json version $manifest"
+            exit 1
+          fi
+
+      - name: Gate suite (if present)
+        run: |
+          if [ -f tests/gates/run-all.sh ]; then bash tests/gates/run-all.sh; fi
+
+      - name: Extract changelog section
+        run: |
+          ver="$(jq -r '.version' .claude-plugin/plugin.json)"
+          awk -v v="$ver" '
+            $0 ~ "^## \\[" v "\\]" { grab=1; next }
+            grab && /^## \[/ { exit }
+            grab { print }
+          ' CHANGELOG.md > release-notes.md
+          echo "wrote $(wc -l < release-notes.md) lines"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file release-notes.md

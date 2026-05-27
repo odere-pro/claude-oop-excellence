@@ -1,0 +1,38 @@
+name: CI
+
+# Active, green out of the box: validates JSON and shell-checks hook scripts using tools that ship on
+# the runner — no extra setup. When you add a gate suite (see the cookbook's 10-validation-and-gates),
+# the last step picks it up automatically.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: JSON parses
+        run: |
+          # jq ships on ubuntu-latest. (*.jsonc files carry comments and are skipped on purpose.)
+          for f in $(git ls-files '*.json'); do
+            jq empty "$f" || { echo "::error file=$f::invalid JSON"; exit 1; }
+          done
+
+      - name: Shellcheck hook scripts
+        run: |
+          if ls hooks/*.sh >/dev/null 2>&1; then shellcheck hooks/*.sh; fi
+
+      - name: Gate suite (if present)
+        run: |
+          if [ -f tests/gates/run-all.sh ]; then
+            bash tests/gates/run-all.sh
+          else
+            echo "no tests/gates/run-all.sh yet — see the cookbook's 10-validation-and-gates"
+          fi
