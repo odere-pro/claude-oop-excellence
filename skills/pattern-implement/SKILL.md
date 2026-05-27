@@ -1,7 +1,7 @@
 ---
 name: pattern-implement
 description: >-
-  Use after /pattern-detect surfaces an opportunity, or directly on a design-pattern id, to
+  Use after /audit pattern-fit surfaces an opportunity, or directly on a design-pattern id, to
   implement that pattern into a target scope with a safe parallel-change sequence and verify it with
   the project's own detected commands. Resolves the pattern against the glossary and delegates to the
   oop-orchestrator in pattern-implement mode, one pattern-implementer per pattern.
@@ -143,7 +143,7 @@ upheld (with one line each on how the implementation honors them), the exact ver
 run and their pass/fail result, and a status (implemented / planned / N/A / aborted). Then recommend
 next steps:
 
-- `/pattern-detect <path>` — re-scan to confirm the pattern now reads as present.
+- `/audit pattern-scan <path>` — re-scan to confirm the pattern now reads as present.
 - `/audit <selection>` — confirm the resolved issue is gone.
 - Commit the behavior-preserving change with a `refactor:` message.
 

@@ -92,3 +92,23 @@ to zoom. Each selector resolves to exactly one row below.
 `tracks` and `aspects` come from `vocabulary`; `categories`, `families`, and entity `id`s are the
 same values used everywhere else in this glossary. A selector always resolves down through the
 layers — choosing a track implies its aspects, an aspect implies its families, and so on.
+
+## Direct layer access
+
+The selector table above maps onto three layers, each independently reachable from the `/audit` front
+door:
+
+- **L1** — the full run: `/audit` with no selector covers **both** tracks.
+- **L2** — a single track or aspect: the `tracks` (`risk`, `pattern`) and `aspects` (`risk-scan`,
+  `pattern-scan`, `pattern-fit`) values registered in `vocabulary`.
+- **L3** — a single family, category, or `<entity-id>`.
+
+So `tracks` + `aspects` are the canonical L1/L2 selectors, while `families`, `categories`, and entity
+`id`s are the L3 selectors — every value resolves through this glossary.
+
+Beyond the `/audit` front door, the five L3 workers — `entity-detector`, `pattern-scanner`,
+`pattern-suggester`, `entity-fixer`, and `pattern-implementer` — are **independently callable by
+id**. Dispatched directly with just an entity id (no orchestrator, no injected record), each reads
+this glossary, self-resolves the matching record, and runs identically to its orchestrator-driven
+path (see each worker's `## Standalone invocation` section). The glossary is the resolution point for
+every layer.

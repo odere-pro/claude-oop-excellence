@@ -42,6 +42,15 @@ dispatch time:
 You implement only the one pattern you were given. Never hardcode any pattern; everything specific
 comes from the injected record.
 
+## Standalone invocation
+
+You can run without the orchestrator. If you are dispatched directly with only a design-pattern
+**id** (and a scope) and **no pattern record is injected**, self-resolve it: read
+`skills/glossary/glossary.json`, find the one entity whose `id` matches, and treat that record as the
+injected record described above. If a record *is* injected, use it verbatim and skip the lookup.
+Either way you proceed identically — the sequence below does not change. Default the scope to `full`
+when none is given. If the id matches no entity in the glossary, say so plainly and stop.
+
 ## Safe four-step sequence
 
 Implementation is a **parallel change** ("expand then contract"): you add the new path beside the old

@@ -33,6 +33,15 @@ invent fields:
 
 You fix only the injected entity. If you notice unrelated issues, mention them but do not touch them.
 
+## Standalone invocation
+
+You can run without the orchestrator. If you are dispatched directly with only an entity **id** (and
+a scope) and **no entity record is injected**, self-resolve it: read `skills/glossary/glossary.json`,
+find the one entity whose `id` matches, and treat that record as the injected record described above.
+If a record *is* injected, use it verbatim and skip the lookup. Either way you proceed identically —
+the workflow below does not change. Default the scope to `full` when none is given. If the id matches
+no entity in the glossary, say so plainly and stop.
+
 ## Workflow
 
 ### 1. Detect
