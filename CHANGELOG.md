@@ -12,14 +12,16 @@ All notable changes to this plugin are documented here. The format follows
 
 - Initial release of `claude-oop-excellence`: a language- and framework-agnostic
   object-oriented design enforcement plugin.
-- Detect skills: `detect-code-antipatterns`, `detect-architecture-antipatterns`,
-  `detect-oop-antipatterns`, `detect-testing-antipatterns`,
-  `detect-concurrency-antipatterns`, `detect-database-antipatterns`, plus `audit`,
-  `risk-scan`, `risk-antipattern-scan`, and `pattern-detect`.
-- Report commands writing timestamped Markdown to `tmp/`: `/risk-report`,
-  `/smell-report`, `/pattern-suggest`.
-- Fix skills/commands (user-invoked only): `improve`, `pattern-implement`,
-  `/fix-risks`, `/implement-patterns`.
-- Ten scanner subagents (two orchestrators + eight leaf scanners) with
-  least-privilege tool grants.
-- `build-plugin` goal skill for scaffolding new plugins via fresh-context subagents.
+- `/oop-excellence` — the pipeline entry point (routes to scan / report / patterns / fix).
+- Skills: `audit` (single scan entry, delegates to the orchestrator), `pattern-detect`,
+  and the user-invoked-only `improve` and `pattern-implement`.
+- Report commands writing timestamped Markdown to `tmp/`: `/risk-report`, `/pattern-suggest`.
+- Fix commands (user-invoked only): `/fix-risks`, `/implement-patterns`.
+- Nine scanner subagents — the `risk-scanner` orchestrator plus eight read-only,
+  least-privilege leaf scanners (code, architecture, OOP, testing, concurrency,
+  database, security, dependency), each carrying its own language-agnostic antipattern
+  catalog.
+- Author CI gate suite under `tests/gates/` (JSON parse, strict validate, frontmatter
+  descriptions, no absolute paths, secret scan, explicit agent tools, side-effect gating,
+  no remote calls, changelog-version, shellcheck, calibration-conformance).
+- `plan.md` tracking the cross-language universality audit.
