@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "claude-oop-excellence",
+  "version": "0.1.0",
+  "description": "Use when auditing, reviewing, or refactoring a codebase for object-oriented design quality in any language. Detects OOP and code, architecture, testing, concurrency, database, and security antipatterns, recommends and applies GoF design patterns, and runs a detect → report → fix loop with unified risk reports and test-verified fixes — framework- and stack-agnostic.",
+  "author": {
+    "name": "odere-pro",
+    "email": "odere.pro@gmail.com"
+  },
+  "homepage": "https://github.com/odere-pro/claude-oop-excellence",
+  "repository": "https://github.com/odere-pro/claude-oop-excellence",
+  "license": "MIT",
+  "keywords": [
+    "oop",
+    "object-oriented-design",
+    "solid",
+    "encapsulation",
+    "design-patterns",
+    "antipatterns",
+    "code-quality",
+    "refactoring",
+    "language-agnostic",
+    "risk-scan",
+    "audit"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "odere-pro",
+  "owner": {
+    "name": "odere-pro",
+    "email": "odere.pro@gmail.com"
+  },
+  "description": "Object-oriented design and code-quality tooling for Claude Code — antipattern scanners, design-pattern detection, and a detect → report → fix pipeline.",
+  "plugins": [
+    {
+      "name": "claude-oop-excellence",
+      "source": "./",
+      "description": "Language-agnostic OOP design enforcement: detects OOP/code/architecture antipatterns, recommends and applies GoF patterns, and runs a detect → report → fix loop with test-verified fixes.",
+      "license": "MIT",
+      "keywords": [
+        "oop",
+        "design-patterns",
+        "antipatterns",
+        "code-quality",
+        "refactoring"
+      ]
+    }
+  ]
+}
