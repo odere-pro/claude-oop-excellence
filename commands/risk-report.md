@@ -12,13 +12,14 @@ Run a comprehensive risk assessment of this repository and save the report to `t
 
 2. Ensure `tmp/` exists at the repository root: `mkdir -p tmp`.
 
-3. Invoke the `/risk-antipattern-scan` skill with `--parallel` and all 8 domains:
+3. Invoke the `/audit` skill across all 8 domains (it delegates to the `risk-scanner`
+   orchestrator, which scans every domain in parallel):
 
    ```
-   /risk-antipattern-scan --parallel --domain code,arch,oop,test,concurrency,db,security,deps
+   /audit all
    ```
 
-   The **oop** domain MUST be included. It detects:
+   The **oop** domain MUST be covered. It detects:
    - God Class (class with too many responsibilities)
    - Anemic Domain Model (classes with no domain logic, only getters/setters)
    - Refused Bequest (subclass ignores or empties inherited parent methods)
@@ -26,7 +27,7 @@ Run a comprehensive risk assessment of this repository and save the report to `t
    - Yo-Yo Problem (deep inheritance chains >4 levels)
    - Inappropriate Intimacy (class accesses private internals of another)
 
-4. Collect the full unified report produced by the skill. Do not truncate or summarise it.
+4. Collect the full unified report produced by the audit. Do not truncate or summarise it.
 
 5. Write the full report to `tmp/risk-report-{TIMESTAMP}.md` (substitute the actual timestamp).
 
@@ -40,4 +41,4 @@ Run a comprehensive risk assessment of this repository and save the report to `t
 
 ## Arguments
 
-`$ARGUMENTS` — optional path to scope the scan (default: repository root). If provided, pass it as the path argument to `/risk-antipattern-scan`.
+`$ARGUMENTS` — optional path to scope the scan (default: repository root). If provided, pass it to `/audit` as `component <path>`.

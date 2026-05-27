@@ -11,11 +11,13 @@ directory under here ships to users when the plugin is installed.
 
 - `.claude-plugin/plugin.json` — the manifest (version of record)
 - `.claude-plugin/marketplace.json` — single-plugin marketplace (`source: "./"`); omits `version`
-- `skills/` — `<name>/SKILL.md` skills (detect/audit/pattern + the side-effecting `improve` and
-  `pattern-implement`, both `disable-model-invocation: true`)
-- `commands/` — flat `.md` skills (the report + fix commands; `fix-risks` and `implement-patterns`
-  are `disable-model-invocation: true`)
-- `agents/` — ten scanner subagents (least-privilege `tools`)
+- `skills/` — `audit` (scan entry), `pattern-detect`, and the side-effecting `improve` and
+  `pattern-implement` (both `disable-model-invocation: true`)
+- `commands/` — flat `.md` skills: the `/oop-excellence` entry point, the report commands
+  (`risk-report`, `pattern-suggest`), and the fix commands (`fix-risks`, `implement-patterns`,
+  both `disable-model-invocation: true`)
+- `agents/` — nine scanner subagents (one `risk-scanner` orchestrator + eight leaf scanners),
+  least-privilege `tools`
 
 This plugin ships no `hooks/` and no `.mcp.json` — it has no event hooks and no MCP server.
 

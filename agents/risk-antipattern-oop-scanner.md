@@ -15,7 +15,7 @@ Accept a target path from the caller. Default: project root. Scan source files m
 
 ## Detection heuristics
 
-Read `.claude/skills/detect-oop-antipatterns/REFERENCE.md` for the complete detection logic, grep patterns, thresholds, false positive guidance, and language-specific notes for all 6 antipatterns:
+Apply the heuristics below. They are language-agnostic — translate each signal into the idioms of whatever language you find (class/struct/interface/trait, the thresholds hold across languages), and apply the false-positive guidance before reporting. All 6 antipatterns:
 
 1. **Anemic Domain Model** — data-only classes with no behavior; logic in separate `*Service` classes
 2. **God Class / Blob** — >30 methods or >500 lines or >10 imports
@@ -24,7 +24,7 @@ Read `.claude/skills/detect-oop-antipatterns/REFERENCE.md` for the complete dete
 5. **Feature Envy** — methods calling >3 getters on a single external object
 6. **Inappropriate Intimacy** — chain calls with 3+ dots, accessing `_private` fields from outside
 
-Apply severity thresholds from REFERENCE.md. Use the language-specific notes (TS/JS, Python, Java) for accurate detection.
+Apply the severity thresholds listed above. Use language-specific judgment (the same antipatterns appear across OOP languages) for accurate detection.
 
 ## Output format
 
@@ -57,6 +57,6 @@ If no findings at a severity level, omit that section.
 
 - Never modify code. This is a read-only scan.
 - Report concrete evidence: class name, file path, line number, metric value.
-- Apply false positive guidance from REFERENCE.md before reporting. When uncertain, downgrade severity by one level.
+- Apply the false-positive guidance above before reporting. When uncertain, downgrade severity by one level.
 - Projects without OOP patterns (purely functional codebases) should be reported as "N/A -- no OOP patterns detected."
 - Do not pad findings. If the OOP design is sound, say so.

@@ -1,136 +1,58 @@
 ---
 name: audit
 description: >-
-  Use before releases or after large PRs to run a full multi-domain quality audit — antipattern
-  scanners (code, architecture, OOP, testing, concurrency, dependency) plus optional type-safety
-  checks, producing one unified, severity-ranked report.
-argument-hint: '[code|arch|oop|test|concurrency|deps|types|all]'
+  Use before releases, after large PRs, or during onboarding to run a full multi-domain quality and
+  risk audit. Delegates to the risk-scanner orchestrator, which fans out the antipattern scanners
+  (code, architecture, OOP, testing, concurrency, database, security, dependency), deduplicates,
+  scores, and returns one unified, severity-ranked report. Language-agnostic; supports selecting
+  domains and scope.
+argument-hint: '[code arch oop test concurrency db security deps | all] [full | changed | component <path>]'
 user-invocable: true
 ---
 
-# Quality Audit
+# Quality & Risk Audit
 
-Comprehensive quality scan across multiple antipattern domains, producing one
-unified severity-ranked report.
-
-## Scope
-
-Source root: the project source root — default `src/` if it exists, otherwise the
-repository root. Exclude build output (`dist/`, `build/`, `out/`), `node_modules/`,
-generated declarations (`*.d.ts`), and (except for the `test` domain) test files.
+The single entry point for scanning a codebase. This skill delegates the heavy lifting to the
+`risk-scanner` orchestrator agent (which runs each domain scanner in its own context, in parallel)
+and returns one unified, severity-ranked report. It assumes nothing about the language or stack.
 
 ## Workflow
 
 ### 1. Parse arguments
 
-Read `$ARGUMENTS`. Map to domain set:
+Read `$ARGUMENTS`:
 
-| Argument | Domains activated |
-|----------|------------------|
-| `code` | code antipatterns |
-| `arch` | architecture antipatterns |
-| `oop` | OOP antipatterns |
-| `test` | testing antipatterns (scan test files) |
-| `concurrency` | concurrency antipatterns |
-| `deps` | dependency hygiene |
-| `types` | type safety (only if a `tsconfig.json` is present) |
-| `all` or empty | all of the above |
+- **Domains** (default `all`): any of `code`, `arch`, `oop`, `test`, `concurrency`, `db`,
+  `security`, `deps`. OOP is always included when classes/structs/interfaces are present — it is the
+  spine of this plugin.
+- **Scope** (default `full`): `full` (whole project), `changed` (files changed vs the base branch),
+  or `component <path>` (a directory or file set).
 
-### 2. Run domain scans in parallel
+### 2. Delegate to the orchestrator
 
-Launch each active domain as an independent scan:
+Invoke the `risk-scanner` agent with the Agent tool. Pass a prompt containing the selected domains
+and scope, for example:
 
-#### Code antipatterns
+- Default / all: `"Scan scope: full. Scanners: all. Verbose mode: ON — report all findings across every severity (critical, high, medium, low); do not cap or truncate."`
+- Targeted: `"Scan scope: component src/api. Scanners: oop, security."`
 
-Use the `detect-code-antipatterns` skill. Focus on:
+`risk-scanner` handles applicability filtering, parallel dispatch, deduplication, weighted scoring,
+and cross-domain correlation.
 
-- Long functions (Spaghetti Code)
-- Oversized files (God Object)
-- Magic numbers and strings outside dedicated constant/config modules
-- Circular imports across feature modules
+### 3. Return the report
 
-#### Architecture antipatterns
+Return the orchestrator's unified report to the user verbatim. Then recommend next steps:
 
-Use the `detect-architecture-antipatterns` skill. Focus on:
+- `/improve <domain>` — fix the highest-severity domain (OOP first when present).
+- `/risk-report` — save a timestamped copy of this report under `tmp/` before changing anything.
+- `/fix-risks` — work through a saved report domain by domain.
 
-- Layer violations (lower layers importing from higher/entry-point layers)
-- Modules reaching across boundaries they should not depend on
-- Big Ball of Mud / Stovepipe signals in the import graph
-
-#### OOP antipatterns
-
-Use the `detect-oop-antipatterns` skill. Focus on:
-
-- Classes that have grown too broad (God Class) — verify core types stay narrow
-- Classes with only static methods (often better as plain functions)
-- Subclasses that add no behaviour (note as info)
-
-#### Testing antipatterns
-
-Use the `detect-testing-antipatterns` skill against the project's test files. Focus on:
-
-- Tests touching the real filesystem, env, network, or clock without isolation
-- Tests asserting on fragile raw output instead of behaviour
-- Missing negative / edge-case coverage for public APIs
-
-#### Concurrency antipatterns
-
-Use the `detect-concurrency-antipatterns` skill. Focus on:
-
-- Shared mutable state accessed across async boundaries
-- Singleton/global mutation in tests without reset between cases
-
-#### Dependency hygiene
-
-Read `package.json` (or the project's manifest) and check:
-
-- Runtime deps pinned predictably (flag overly broad ranges where determinism matters)
-- No dev-only dependencies declared as runtime `dependencies`
-- A lock file is present and an engine/runtime version constraint is set
-
-#### Type safety (only when a `tsconfig.json` exists)
-
-Run `npx tsc --noEmit --strict 2>&1` (or the project's typecheck script). Check for:
-
-- `any` usage outside intentional boundary casts
-- Missing return types on exported functions
-- Non-null assertions (`!`) without a guard comment explaining why
-
-### 3. Compile unified report
+## Usage
 
 ```
-# Quality Audit
-
-**Scanned:** {file count} source files
-**Date:** {date}
-**Domains:** {active domains}
-
-## Summary
-
-| Domain | Critical | Warning | Info |
-|--------|----------|---------|------|
-| Code   | ...      | ...     | ...  |
-| ...    |          |         |      |
-| **Total** | ... | ...     | ...  |
-
-## Critical findings
-- [{domain}/{antipattern}] {file}:{line} — {description}
-
-## Warnings
-- [{domain}/{antipattern}] {file}:{line} — {description}
-
-## Info
-- [{domain}/{antipattern}] {file}:{line} — {description}
-
-## Recommended next steps
-1. ...
+/audit
+/audit all
+/audit oop security
+/audit code oop changed
+/audit oop component src/domain
 ```
-
-Sort all findings within each severity by domain, then file path.
-
-### 4. Recommended next steps
-
-After the report, suggest:
-
-- Run `/improve <domain>` to fix the highest-severity domain
-- Run the project's test suite to confirm no regressions after fixes

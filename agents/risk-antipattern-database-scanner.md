@@ -15,14 +15,14 @@ Accept a target path from the caller. Default: project root. Scan for: SQL files
 
 ## Detection heuristics
 
-Read `.claude/skills/detect-database-antipatterns/REFERENCE.md` for the complete detection logic, ORM-specific patterns (Prisma, TypeORM, Sequelize, SQLAlchemy, ActiveRecord), thresholds, and false positive guidance for all 4 antipatterns:
+Apply the heuristics below. They are ORM- and dialect-agnostic — map each signal onto whatever data layer you find (Prisma, TypeORM, Sequelize, SQLAlchemy, ActiveRecord, JPA/Hibernate, raw SQL), and apply the false-positive guidance before reporting. All 4 antipatterns:
 
 1. **God Table** — >20 columns, >50% nullable, generic column names (`data`, `value`, `field1`)
 2. **Inner-Platform Effect** — custom query builders, application-level indexing, custom transaction management
 3. **EAV Abuse** — `entity_id, attribute_name, attribute_value` pattern with typed data stored as strings
 4. **N+1 Query** — queries inside loops, `.forEach(async` with DB calls, missing eager loading
 
-Detect the ORM/database tooling first to apply the correct detection patterns from REFERENCE.md.
+Detect the ORM/database tooling first to apply the correct detection patterns.
 
 ## Output format
 
@@ -55,6 +55,6 @@ If no findings at a severity level, omit that section.
 
 - Never modify code or schemas. This is a read-only scan.
 - Report concrete evidence: table name or file path, line number, column count or query pattern.
-- Apply false positive guidance from REFERENCE.md before reporting.
+- Apply the false-positive guidance above before reporting.
 - If no database patterns are detected, report "No database patterns detected -- scan not applicable."
 - Do not pad findings.

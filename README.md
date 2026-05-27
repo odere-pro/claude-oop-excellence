@@ -27,20 +27,24 @@ throughout: it is mandatory in audits and fixed before other domains.
 
 ## The pipeline
 
+Start at the front door — **`/oop-excellence`** — or call any phase directly:
+
 ```
-        DETECT                    REPORT (writes tmp/)            FIX (reads tmp/)
-  ┌──────────────────┐        ┌──────────────────────┐      ┌────────────────────┐
-  │ /audit           │        │ /risk-report          │      │ /fix-risks          │
-  │ /risk-antipattern│ ─────▶ │ /smell-report         │ ───▶ │ /implement-patterns │
-  │ -scan /risk-scan │        │ /pattern-suggest      │      │                     │
-  │ /pattern-detect  │        └──────────────────────┘      └────────────────────┘
-  │ /detect-*        │           saves a timestamped            re-reads the saved
-  └──────────────────┘           report under tmp/              report, applies fixes
+                          /oop-excellence  (entry point)
+                                  │
+        DETECT                    REPORT (writes tmp/)         FIX (reads tmp/, gated)
+  ┌──────────────────┐      ┌──────────────────────┐      ┌─────────────────────┐
+  │ /audit           │ ───▶ │ /risk-report          │ ───▶ │ /fix-risks          │
+  │ /pattern-detect  │      │ /pattern-suggest      │      │ /implement-patterns │
+  └──────────────────┘      └──────────────────────┘      └─────────────────────┘
+       runs the scanners        saves a timestamped            re-reads the saved
+       (OOP always covered)     report under tmp/              report, applies fixes
 ```
 
 The report phase writes a timestamped markdown file under `tmp/`; the fix phase
 discovers that file and works through the findings domain by domain. This hand-off
-lets you review findings before anything is changed.
+lets you review findings before anything is changed. The fix commands are
+**user-invoked only** (`disable-model-invocation`) — Claude never refactors on its own.
 
 ## Phases
 
@@ -48,51 +52,38 @@ lets you review findings before anything is changed.
 
 | Command / skill | What it does |
 | --- | --- |
-| `/audit [domains]` | Full multi-domain quality scan → one unified severity-ranked report |
-| `/risk-antipattern-scan` | Dispatches the 8 specialized scanner agents (parallel or sequential) |
-| `/risk-scan [domain] [scope]` | Risk assessment via dynamic scanner discovery; selective by domain/scope |
+| `/oop-excellence [scan\|report\|patterns\|fix]` | Front door — routes to any phase; defaults to a full audit + next-step menu |
+| `/audit [domains] [scope]` | Full multi-domain scan via the `risk-scanner` orchestrator → one unified severity-ranked report. Covers code, architecture, OOP, testing, concurrency, database, security, dependency |
 | `/pattern-detect [detect\|audit] [path]` | Detects existing design patterns and recommends new ones |
-| `/detect-code-antipatterns` | God Object, Spaghetti, Lava Flow, Copy-Paste, Magic Numbers, Circular Deps… |
-| `/detect-architecture-antipatterns` | Big Ball of Mud, Vendor Lock-In, Reinventing the Wheel, Stovepipe… |
-| `/detect-oop-antipatterns` | Anemic Domain Model, God Class, Yo-Yo, Refused Bequest, Feature Envy… |
-| `/detect-testing-antipatterns` | Ice Cream Cone, Flaky Tests, Implementation-detail tests, Slow Tests |
-| `/detect-concurrency-antipatterns` | Race Conditions, Deadlocks, Busy Waiting, Thread Starvation |
-| `/detect-database-antipatterns` | God Table, Inner-Platform Effect, EAV Abuse, N+1 Query |
+
+The eight antipattern domains (God Object/Spaghetti/Lava Flow; Big Ball of Mud/Stovepipe; Anemic
+Domain Model/God Class/Feature Envy; Ice Cream Cone/Flaky Tests; Race Conditions/Deadlocks; God
+Table/N+1; injection/secrets; dependency hygiene) live in the scanner agents below — `/audit`
+dispatches them, so there is one scan entry point rather than a skill per domain.
 
 ### 2. Report (writes to `tmp/`)
 
 | Command | Output |
 | --- | --- |
 | `/risk-report` | `tmp/risk-report-{timestamp}.md` — full 8-domain risk assessment |
-| `/smell-report` | `tmp/smell-report-{timestamp}.md` — unified code-smell audit |
 | `/pattern-suggest` | `tmp/pattern-recommendations-{timestamp}.md` — design-pattern opportunities |
 
 ### 3. Fix (reads from `tmp/`)
 
 | Command | What it does |
 | --- | --- |
-| `/fix-risks` | Reads the risk/smell reports, fixes domain by domain via `/improve` |
+| `/fix-risks` | Reads the saved risk report, fixes domain by domain via `/improve` (OOP first) |
 | `/implement-patterns` | Reads the pattern report, applies top-priority patterns via `/pattern-implement` |
 
-Supporting fix skills: `/improve <domain>` (detect → plan → confirm → apply →
-verify for one domain) and `/pattern-implement [plan\|apply] <pattern> [path]`.
+Supporting fix skills (both user-invoked only): `/improve <domain>` (detect → plan → confirm →
+apply → verify for one domain) and `/pattern-implement [plan\|apply] <pattern> [path]`.
 
 ## Scanner agents
 
-Ten agents back the scan commands. Two orchestrators —
-`risk-antipattern-scanner` (fixed 8-domain dispatch) and `risk-scanner`
-(dynamic discovery + cross-domain correlation) — coordinate eight leaf scanners:
-code, architecture, OOP, testing, concurrency, database, security, and dependency.
-
-## Meta: building plugins (`/build-plugin`)
-
-The plugin also ships a **goal skill**, `/build-plugin`, that builds *other* Claude
-Code plugins step by step. Give it a goal and it decomposes the work into phases,
-dispatches each unit to a **fresh-context subagent**, and persists all state to disk
-between runs — so context never accumulates and independent units run as **multiple
-subagents in parallel**. This is the same clean-context, disk-handoff pattern the
-detect → report → fix pipeline uses, generalized. The step-by-step build reference
-lives in `skills/build-plugin/PLAYBOOK.md`.
+Nine agents back the scan. One orchestrator — `risk-scanner` — coordinates eight leaf scanners
+(code, architecture, OOP, testing, concurrency, database, security, dependency), each a focused,
+read-only, least-privilege specialist. `/audit` delegates to the orchestrator; the orchestrator
+fans out to the applicable leaf scanners in parallel, deduplicates, scores, and correlates.
 
 ## Install
 
@@ -115,11 +106,17 @@ Once installed, every command and skill above is available by name.
 
 ## Extending
 
-`risk-scanner` auto-discovers any agent named `risk-*-scanner`, so you can drop in
-new domain scanners without touching the orchestrator. Documented extension points
-not yet shipped here: `risk-complexity-scanner`, `risk-configuration-scanner`,
-`risk-documentation-scanner`, `risk-error-handling-scanner`, and
-`risk-type-safety-scanner`.
+To add a domain scanner: write a new `agents/risk-antipattern-<domain>-scanner.md` (read-only,
+least-privilege `tools`) and register it in the `risk-scanner` orchestrator's roster table and
+`tools` allow-list. Candidate domains not yet shipped: complexity, configuration, documentation,
+error-handling, type-safety.
+
+## Language coverage
+
+The detection knowledge is language-agnostic and the scanners detect the stack rather than assume
+one. Known stack-specific edges (and the plan to close them) are tracked in [`plan.md`](plan.md) —
+notably that the `types` domain currently uses `tsc` and the source globs do not yet span every
+target language.
 
 ## Notes
 
@@ -127,4 +124,4 @@ not yet shipped here: `risk-complexity-scanner`, `risk-configuration-scanner`,
   markdown; review them before running a fix command.
 - The fix skills detect the project's package manager and test/typecheck/lint
   scripts (npm / pnpm / yarn / bun) and verify each change before moving on.
-- Type-safety checks run only when a `tsconfig.json` is present.
+- Type-safety checks run only when a `tsconfig.json` is present (see `plan.md`).

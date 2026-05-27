@@ -15,7 +15,7 @@ Accept a target path from the caller. Default: project root. Analyze directory s
 
 ## Detection heuristics
 
-Read `.claude/skills/detect-architecture-antipatterns/REFERENCE.md` for the complete detection logic, grep patterns, thresholds, and false positive guidance for all 5 antipatterns:
+Apply the heuristics below. They are language-agnostic — translate each signal into the idioms of whatever language you find (the thresholds hold across languages), and apply the false-positive guidance before reporting. All 5 antipatterns:
 
 1. **Big Ball of Mud** — import graph breadth (>5 directories per file), no layer separation
 2. **Vendor Lock-In** — platform SDK imports in business logic without abstraction layer
@@ -23,7 +23,7 @@ Read `.claude/skills/detect-architecture-antipatterns/REFERENCE.md` for the comp
 4. **Architecture by Implication** — missing ADR directory, no architecture docs, conflicting patterns
 5. **Stovepipe System** — duplicate type definitions across modules, no shared contracts
 
-Apply severity thresholds from REFERENCE.md. Use `git log` to check architecture doc staleness.
+Apply the severity thresholds listed above. Use `git log` to check architecture doc staleness.
 
 ## Combination signals
 

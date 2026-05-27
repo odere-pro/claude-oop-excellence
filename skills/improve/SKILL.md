@@ -28,17 +28,18 @@ If no domain is given, ask the user which domain to improve before continuing.
 
 ### 2. Detect
 
-Run the appropriate detection skill against the target path:
+Delegate detection to the matching read-only scanner agent (via the Agent tool), scoped to the
+target path:
 
-| Domain | Skill / check |
-|--------|--------------|
-| `code` | `detect-code-antipatterns` on the source root |
-| `arch` | `detect-architecture-antipatterns` on the source root |
-| `oop` | `detect-oop-antipatterns` on the source root |
-| `test` | `detect-testing-antipatterns` on the project's test files |
+| Domain | Scanner agent / check |
+|--------|----------------------|
+| `code` | `risk-antipattern-code-scanner` on the source root |
+| `arch` | `risk-antipattern-architecture-scanner` on the source root |
+| `oop` | `risk-antipattern-oop-scanner` on the source root |
+| `test` | `risk-antipattern-test-scanner` on the project's test files |
 | `types` | `tsc --noEmit --strict` (only if a `tsconfig.json` exists) + grep for `any`, `!`, missing return types |
 
-Collect all findings, grouped by severity (critical → warning → info).
+Collect all findings from the agent's report, grouped by severity (critical → warning → info).
 
 ### 3. Plan
 

@@ -15,7 +15,7 @@ Accept a target path from the caller. Default: project root. Scan source files m
 
 ## Detection heuristics
 
-Read `.claude/skills/detect-code-antipatterns/REFERENCE.md` for the complete detection logic, grep patterns, thresholds, and false positive guidance for all 10 antipatterns:
+Apply the heuristics below. They are language-agnostic — translate each signal into the idioms of whatever language you find (the thresholds hold across languages), and apply the false-positive guidance before reporting. All 10 antipatterns:
 
 1. **God Object** — files >500 lines with >15 exports (critical: >1000 lines AND >25 exports)
 2. **Spaghetti Code** — functions >80 lines or nesting >4 (critical: >150 lines or >6)
@@ -28,7 +28,7 @@ Read `.claude/skills/detect-code-antipatterns/REFERENCE.md` for the complete det
 9. **Boat Anchor** — exports with zero external consumers
 10. **Golden Hammer** — same pattern applied >5 times where alternatives exist
 
-Apply severity thresholds from REFERENCE.md. Use `git blame` on Lava Flow findings to check age.
+Apply the severity thresholds listed above. Use `git blame` on Lava Flow findings to check age.
 
 ## Sampling strategy
 
@@ -65,6 +65,6 @@ If no findings at a severity level, omit that section.
 
 - Never modify code. This is a read-only scan.
 - Report concrete evidence for every finding -- file path, line number, metric value.
-- Apply false positive guidance from REFERENCE.md before reporting.
+- Apply the false-positive guidance above before reporting.
 - When findings combine (e.g., God Object + Circular Dependency in the same file), note the combination explicitly.
 - Do not pad findings. If a codebase is clean, say so.

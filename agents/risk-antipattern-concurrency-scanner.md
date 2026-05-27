@@ -15,14 +15,14 @@ Accept a target path from the caller. Default: project root. Scan source files m
 
 ## Detection heuristics
 
-Read `.claude/skills/detect-concurrency-antipatterns/REFERENCE.md` for the complete detection logic, language-specific grep patterns (JS/TS, Python, Go, Java), thresholds, and false positive guidance for all 4 antipatterns:
+Apply the heuristics below. They are language-agnostic — map each signal onto the concurrency primitives of whatever language you find (threads, async/await, goroutines, locks/mutexes, actors), and apply the false-positive guidance before reporting. All 4 antipatterns:
 
 1. **Race Condition** — shared mutable state in async callbacks, missing `await` on shared writes, goroutine data races
 2. **Deadlock** — nested locks in different orders, `await` inside lock scope, circular channel dependencies
 3. **Busy Waiting** — `while` loops without `await`/`sleep`/`yield`, `setInterval` polling without cleanup
 4. **Thread Starvation** — unbounded `Promise.all`, thread pool without size limits, unbounded goroutine creation
 
-Detect the primary language(s) first and apply only the relevant language-specific patterns from REFERENCE.md.
+Detect the primary language(s) first and apply only the relevant language-specific patterns.
 
 ## Output format
 
