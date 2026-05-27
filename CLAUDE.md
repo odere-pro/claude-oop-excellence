@@ -11,11 +11,23 @@ directory under here ships to users when the plugin is installed.
 
 - `.claude-plugin/plugin.json` — the manifest (version of record)
 - `.claude-plugin/marketplace.json` — single-plugin marketplace (`source: "./"`); omits `version`
-- `skills/` — `<name>/SKILL.md` skills (detect/audit/pattern + the side-effecting `improve` and
-  `pattern-implement`, both `disable-model-invocation: true`)
-- `commands/` — flat `.md` skills (the report + fix commands; `fix-risks` and `implement-patterns`
-  are `disable-model-invocation: true`)
-- `agents/` — ten scanner subagents (least-privilege `tools`)
+- `skills/glossary/` — the canonical glossary (`glossary.json`, single source of truth for all 102
+  entities + shared vocabulary including the `vocabulary.tracks` / `vocabulary.aspects` selector
+  registry) and its lookup `SKILL.md`, plus the relocated patterns catalog docs (`PATTERNS.md`,
+  `PATTERN-EXAMPLES.md`, `PATTERN-REFERENCE.md`)
+- `skills/` — `audit` (the single read-only front door; runs both the RISK and PATTERN tracks in
+  parallel into one unified report, every track / aspect / family / entity individually selectable)
+  and the side-effecting `improve` and `pattern-implement` (both `disable-model-invocation: true`)
+- `commands/` — flat `.md` skills: the report command(s) and the fix commands (`fix-risks`,
+  `implement-patterns`, both `disable-model-invocation: true`). The `/oop-excellence`, `/risk-report`,
+  and `/pattern-suggest` commands are retired — analysis is folded into `/audit`.
+- `agents/` — an `oop-orchestrator` (formerly `risk-scanner`) with an `analyze` super-mode that
+  drives both tracks, plus five generic glossary-driven workers (`entity-detector`, `entity-fixer`,
+  `pattern-scanner`, `pattern-suggester`, `pattern-implementer`), least-privilege `tools`. The
+  orchestrator selects in-scope entities from the glossary, fans the workers out per entity in
+  parallel, and closes the audit → action handoff (Recommended Actions emit the gated `/fix-risks` /
+  `/implement-patterns`). The `pattern-detect` skill and the eight hardcoded
+  `risk-antipattern-*-scanner` leaf agents are retired — their knowledge now lives in the glossary.
 
 This plugin ships no `hooks/` and no `.mcp.json` — it has no event hooks and no MCP server.
 

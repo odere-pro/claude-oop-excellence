@@ -1,98 +1,115 @@
 ---
 description: >-
-  Use to act on an existing risk/smell report (or generate one first) and fix the findings domain by
-  domain — applies code changes via the improve skill, OOP antipatterns first. Modifies source, so
-  user-invoked only.
+  Use to fix risk findings via the fix verb (improve → oop-orchestrator fix mode) — the gated FIX
+  action the /audit report's Recommended Actions hands off to. Resolves an entity selection against
+  the glossary and applies the smallest corrective refactor per in-scope entity, OOP first, verified
+  with the project's own test commands. Supports --plan-only. Modifies source, so user-invoked only.
 disable-model-invocation: true
-argument-hint: '[domains]'
+argument-hint: '[<entity-id> | <family> | all] [full | changed | component <path>] [--plan-only]'
 ---
 
-Find existing risk and code-smell reports in `tmp/`, then fix the identified issues domain by domain using the improve skill.
+The gated **FIX action front door** — the side-effecting command that the `/audit` report's
+**Recommended Actions** section hands off to. Run the **fix** verb against this repository. Because it
+**writes to your source tree**, it is user-invoked only. It resolves your selection against the
+glossary (`skills/glossary/glossary.json`) and delegates to the `improve` skill, which drives the
+`oop-orchestrator` in **fix** mode (one `entity-fixer` per in-scope entity, fanned out in parallel
+batched by family). Each fixer detects instances of its one injected entity, applies the smallest
+corrective refactor, and verifies with the project's own detected test/typecheck/lint commands.
 
-## Phase 1 — Acquire reports
+## Selection grammar
 
-1. Check for the most recent risk and smell reports:
+```
+[<entity-id> | <family> | all] [full | changed | component <path>] [--plan-only]
+```
+
+- **Selection** (default `all`) — a single glossary issue id (e.g. `god-class`, `feature-envy`,
+  `shotgun-surgery`), an issue **family** (`oop`, `code`, `architecture`, `testing`, `concurrency`,
+  `database`, `security`, `dependency`), or `all` issue entities.
+- **Scope** (default `full`) — `full`, `changed` (vs the base branch), or `component <path>`.
+- **`--plan-only`** (or a leading `plan` token) — produce the corrective plan (detected instances +
+  intended diffs) and make **no edits**. Use it to preview the refactor before committing to it.
+
+Only issue entities are in scope for the fix verb — design patterns belong to `/implement-patterns`.
+
+## Phase 1 — Parse and acquire context
+
+1. Parse `$ARGUMENTS` into a **selection** (default `all`), a **scope** (default `full`), and the
+   optional `--plan-only` flag (set it when `--plan-only` or a leading `plan` token is present).
+
+2. Check for the most recent saved `/audit` report for context (optional, not required):
 
    ```bash
-   ls -t tmp/risk-report-*.md 2>/dev/null | head -1
-   ls -t tmp/smell-report-*.md 2>/dev/null | head -1
+   ls -t tmp/audit-report-*.md 2>/dev/null | head -1
    ```
 
-2. If either file is missing, generate it first:
-   - Missing risk report → invoke `/risk-report` and wait for completion.
-   - Missing smell report → invoke `/smell-report` and wait for completion.
+   If one exists, read it to prioritise which entities have live findings — its **Recommended
+   Actions** section is the handoff that points here. If none exists, proceed — the fix verb
+   re-detects within scope; you do not need a report to run.
 
-3. Read both files in full.
+## Phase 2 — Resolve the selection and confirm the agenda
 
-## Phase 2 — Build the fix agenda
+1. Resolve the selection against the glossary into the concrete set of in-scope issue entities,
+   grouped by family. **OOP is the spine** — when the selection is `all` (or `oop`), OOP-family
+   entities (God Class, Anemic Domain Model, Yo-Yo Problem, Refused Bequest, Feature Envy,
+   Inappropriate Intimacy) are fixed first.
 
-1. Parse both reports and extract all domains that have at least one **Critical**, **High**, or **Warning** finding. Map each to the correct `/improve` domain argument:
-
-   | Report domain        | `/improve` argument |
-   |----------------------|---------------------|
-   | code / Code          | `code`              |
-   | arch / Architecture  | `arch`              |
-   | oop / OOP            | `oop`               |
-   | test / Testing       | `test`              |
-   | concurrency          | `code`              |
-   | types / TypeScript   | `types`             |
-
-   **OOP is mandatory in the agenda** when either report lists any finding related to:
-   God Class, Anemic Domain Model, Yo-Yo Problem, Refused Bequest, Feature Envy, or
-   Inappropriate Intimacy — even at Medium severity. The `/improve oop` run will invoke
-   `detect-oop-antipatterns` and apply targeted refactors: extract base classes, introduce
-   interfaces, and break up God Classes.
-
-2. Sort the agenda: Critical findings first by domain, then High/Warning findings.
-   Deduplicate domains that appear in both reports.
-
-3. Present the fix agenda to the user before making any changes:
+2. Present the fix agenda to the user before making any changes (skip the confirmation prompt and run
+   automatically only when `--plan-only` is set, since that writes nothing):
 
    ```
-   Fix agenda ({n} domains):
-   1. [critical] oop  — {finding count} OOP antipattern findings
-   2. [high]     code — {finding count} findings
+   Fix agenda — selection: {selection}, scope: {scope}{, plan-only}
+   Families (OOP first):
+   1. oop  — {entity count} entities resolved
+   2. code — {entity count} entities resolved
    ...
    Proceed? [all / select / skip]
    ```
 
-   - **all** — run all domains in listed order.
-   - **select** — ask y/n before each domain.
+   - **all** — fix every resolved family in listed order (OOP first).
+   - **select** — ask y/n before each family.
    - **skip** — exit without any changes.
 
-## Phase 3 — Apply fixes
+## Phase 3 — Delegate to the fix verb
 
-1. For each approved domain, invoke:
+1. For each approved selection, invoke the `improve` skill, passing the selection, scope, and the
+   `--plan-only` flag when set:
 
    ```
-   /improve {domain}
+   /improve <selection> <scope> [--plan-only]
    ```
 
-   Wait for each invocation to complete before starting the next. Do not suppress typecheck errors
-   or test failures — report them in the running log and continue to the next domain.
+   For example `/improve oop component src/`, `/improve feature-envy --plan-only`, or
+   `/improve god-class changed`. The `improve` skill resolves applicability via each entity's
+   `applies_when` (an explicit entity-id or family selection overrides smart-dispatch skips) and fans
+   out one `entity-fixer` per entity through `oop-orchestrator` in fix mode. Wait for each invocation
+   to complete before starting the next. Do not suppress typecheck errors or test failures — report
+   them in the running log and continue to the next selection.
 
 ## Phase 4 — Summary
 
-1. After all domains are processed, print:
+1. After all selections are processed, print:
 
    ```
    Fix run complete.
 
-   Domains processed: {n}
-   Domains with applied fixes: {n}
-   Domains with failures: {n}
+   Selection: {selection}  Scope: {scope}{  (plan-only)}
+   Entities processed: {n}
+   Entities with applied fixes: {n}   (or planned, in --plan-only mode)
+   Entities with failures: {n}
 
-   Details:
-   - oop:  {n} fixes applied / {n} skipped / {n} reverted
-   - code: {n} fixes applied / {n} skipped / {n} reverted
+   Details (by family, OOP first):
+   - oop:  {n} fixed / {n} skipped / {n} reverted
+   - code: {n} fixed / {n} skipped / {n} reverted
    ...
 
    Next steps:
-   - Run `/risk-report` to confirm risk scores dropped.
-   - Run `/smell-report` to confirm smell counts dropped.
-   - Commit: refactor: apply automated fixes across {domains}
+   - Run `/audit <selection>` to re-scan and confirm risk scores dropped.
+   - Commit: refactor: apply automated fixes for {selection}
    ```
 
 ## Arguments
 
-`$ARGUMENTS` — optional comma-separated domain list (e.g., `oop,code`) to restrict processing to those domains only. Reports are still acquired first even when the domain list is restricted.
+`$ARGUMENTS` — `[<entity-id> | <family> | all] [full | changed | component <path>] [--plan-only]`.
+With no arguments, fixes `all` applicable issue entities over the `full` project (OOP first). Pass any
+prefix and the rest fall back to defaults (e.g. just `oop`, or `god-class component src/`). Add
+`--plan-only` to preview without writing.
