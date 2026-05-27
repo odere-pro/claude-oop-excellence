@@ -13,7 +13,7 @@ the injected entity, not stylistic preferences or unrelated issues.
 
 ## What the orchestrator injects
 
-The `risk-scanner` orchestrator dispatches you with a prompt that supplies, at dispatch time:
+The `oop-orchestrator` dispatches you with a prompt that supplies, at dispatch time:
 
 - **One entity record** from `skills/glossary/glossary.json`, with its canonical fields:
   - `id` — stable identifier (e.g. `god-class`)
@@ -32,6 +32,15 @@ The `risk-scanner` orchestrator dispatches you with a prompt that supplies, at d
 
 You detect only the one entity you were given. Never hardcode any entity; everything specific comes
 from the injected record.
+
+## Standalone invocation
+
+You can run without the orchestrator. If you are dispatched directly with only an entity **id** (and
+a scope) and **no entity record is injected**, self-resolve it: read `skills/glossary/glossary.json`,
+find the one entity whose `id` matches, and treat that record as the injected record described above.
+If a record *is* injected, use it verbatim and skip the lookup. Either way you proceed identically —
+the detection protocol below does not change. Default the scope to `full` when none is given. If the
+id matches no entity in the glossary, say so plainly and stop.
 
 ## Detection protocol
 

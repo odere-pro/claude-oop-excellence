@@ -53,8 +53,8 @@ against it, zooming from the broadest layer (a whole track) to the narrowest (on
 - **`full` / `changed` / `component <path>` / none** — the **L1 full run**: the RISK track and the
   PATTERN track dispatched **in parallel**, merged into one unified report. (A bare scope word with
   no selector is the full run scoped accordingly.)
-- **`risks`** — the **RISK track only**: every issue family (`oop`, `code`, `architecture`,
-  `testing`, `concurrency`, `database`, `security`, `dependency`).
+- **`risks`** — the **RISK track only** (its sole aspect is `risk-scan`): every issue family (`oop`,
+  `code`, `architecture`, `testing`, `concurrency`, `database`, `security`, `dependency`).
 - **`patterns`** — the **PATTERN track**: both aspects, `pattern-scan` + `pattern-fit`.
 - **`pattern-scan`** — one aspect: design patterns **already present** in the code.
 - **`pattern-fit`** — one aspect: the **most-suitable** patterns where one would help.
@@ -70,6 +70,35 @@ against it, zooming from the broadest layer (a whole track) to the narrowest (on
 - **`full`** — the whole project (default).
 - **`changed`** — only files changed versus the base branch.
 - **`component <path>`** — a single subtree (a directory or file set).
+
+## Direct layer access
+
+Every layer is reachable on its own — you never have to run the whole pipeline to touch a single
+slice. The selector zooms across the three layers, and each is a valid entry point:
+
+- **L1 — the full run.** `/audit [full | changed | component <path>]` dispatches **both tracks in
+  parallel** through the `oop-orchestrator` and merges them into one report.
+- **L2 — one track or aspect.** `/audit risks`, `/audit patterns`, `/audit pattern-scan`, or
+  `/audit pattern-fit` runs just that track/aspect (the RISK track's sole aspect is `risk-scan`). The
+  orchestrator still resolves and fans out, but only over the selected slice.
+- **L3 — one family, category, or entity.** `/audit <family>`, `/audit <category>`, or
+  `/audit <entity-id>` (e.g. `/audit oop`, `/audit god-class`, `/audit strategy`) narrows to a single
+  slice or a single record.
+
+**The orchestrator is skippable for single-entity work.** For a single L3 entity, an agent can
+dispatch one worker **directly** with the Task tool, passing only an entity **id** (and an optional
+scope) — no orchestrator, no injected record. The worker self-resolves the full record from
+`skills/glossary/glossary.json` (see each worker's `## Standalone invocation` section) and proceeds
+identically:
+
+- `entity-detector` — detect one issue (read-only).
+- `pattern-scanner` — detect whether one design pattern is already present (read-only).
+- `pattern-suggester` — evaluate fit for one design pattern (read-only).
+- `entity-fixer` — fix one issue (gated, side-effecting).
+- `pattern-implementer` — implement one design pattern (gated, side-effecting).
+
+The user-facing path stays the `/audit` selector; the direct worker dispatch is the agent-facing
+shortcut when only one entity is in play.
 
 ## Workflow
 

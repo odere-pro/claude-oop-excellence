@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "claude-oop-excellence",
-  "version": "0.3.0",
+  "version": "0.1.0",
   "description": "Use when auditing, reviewing, or refactoring a codebase for object-oriented design quality in any language. A single read-only front door, /audit, runs two analysis tracks in parallel — RISK (issues) and PATTERN (existing-pattern scan + pattern-fit suggestions) — and merges them into one unified report; every layer (track / aspect / family / entity) is individually selectable. Driven by a canonical glossary of 102 entities (45 issues + 57 design patterns) and glossary-driven workers that fan out per entity in parallel. The report's Recommended Actions hand off to gated, test-verified fix and implement commands — principle-based and stack-agnostic.",
   "author": {
     "name": "odere-pro",

@@ -2,8 +2,9 @@
 # Conformance of the shared glossary (skills/glossary/glossary.json) — the single source of truth
 # for issues and design patterns. STRICT gate: validates structure, the field contract per entity
 # kind, the controlled vocab, the selector registry (tracks/aspects), cross-references, verb-path
-# coverage, the 3-layer single-front-door wiring, retired-file absence, and the entity counts echoed
-# in README.md / CHANGELOG.md.
+# coverage, the 3-layer single-front-door wiring, retired-file absence, the retired-name content scan
+# (no live component references a renamed/retired name), and the entity counts echoed in README.md /
+# CHANGELOG.md.
 set -euo pipefail
 # shellcheck source=tests/gates/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -220,6 +221,26 @@ else
       || { echo "FAIL: ${ORCHESTRATOR} does not reference worker '${worker}'"; fail=1; }
   done
 fi
+
+# 7c. Retired-name content scan: no functional component (skills/ commands/ agents/, *.md only) may
+#     reference a retired orchestrator name or a retired slash command. The patterns are chosen NOT to
+#     match the live `risk-scan` aspect or the `pattern-scanner` / `pattern-suggester` workers — the
+#     literal `risk-scanner` token does not occur inside those, and the leading slash on the commands
+#     keeps them from matching the slashless worker names.
+RETIRED_PATTERNS=(
+  'risk-scanner'
+  '/oop-excellence'
+  '/risk-report'
+  '/pattern-suggest'
+  '/pattern-detect'
+)
+for pat in "${RETIRED_PATTERNS[@]}"; do
+  while IFS= read -r hit; do
+    [ -n "${hit}" ] || continue
+    echo "FAIL: retired name '${pat}' found in functional component: ${hit}"
+    fail=1
+  done < <(grep -rFn --include='*.md' -- "${pat}" skills commands agents 2>/dev/null)
+done
 
 # 8. README.md and CHANGELOG.md must each state the computed counts (tolerant, case-insensitive,
 #    order-independent). issues→"issue", patterns→"pattern" (allows "design pattern").
