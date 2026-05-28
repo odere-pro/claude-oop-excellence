@@ -9,6 +9,7 @@ description: >-
 argument-hint: '[<entity-id> | <family> | all] [full | changed | component <path>] [--plan-only]'
 user-invocable: true
 disable-model-invocation: true
+allowed-tools: Read, Agent(oop-orchestrator)
 ---
 
 # Quality Improver

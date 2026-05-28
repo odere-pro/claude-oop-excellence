@@ -6,6 +6,16 @@ All notable changes to this plugin are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- A read-only `onboarding` skill (`skills/onboarding/SKILL.md`) — an in-session orientation to
+  the plugin: the mental model (one read-only front door, `/audit`; three layers; two tracks —
+  RISK + PATTERN), the analyze → act flow that hands off to the gated `/fix-risks` and
+  `/implement-patterns` commands, and a selector/scope cheat sheet. The in-session twin of the
+  README's "Quick start" + "How it works"; points to the `glossary` and README for depth.
+  Model-invocable (like `audit` and `glossary`) so it can fire when a new user asks how to use
+  the plugin. Changes nothing.
+
 ## [0.1.0] - 2026-05-27
 
 Initial release of `claude-oop-excellence`: a language- and framework-agnostic

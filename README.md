@@ -63,6 +63,9 @@ claude --plugin-dir /path/to/claude-oop-excellence
 /reload-plugins
 ```
 
+New here? Run `/onboarding` for a read-only, in-session guided tour of the mental model and the
+analyze → act flow before you dive in.
+
 Then run your first audit — it is **read-only** and never changes code:
 
 ```
@@ -184,6 +187,7 @@ them with real selectors and real paths.
 | Skill | What it does |
 | --- | --- |
 | `glossary` | Read-only lookup over `skills/glossary/glossary.json` — resolve any entity by id, list a family or category, or follow the cross-references (which patterns fix an issue, which issues a pattern resolves). The design-pattern catalog lives at `skills/glossary/PATTERNS.md` |
+| `onboarding` | Read-only orientation to the plugin — the mental model (one front door, three layers, two tracks), the analyze → act flow, and which command to run next. The in-session twin of [Quick start](#quick-start) + [How it works](#how-it-works) |
 
 ## Agents
 

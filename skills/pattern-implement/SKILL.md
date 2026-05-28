@@ -9,6 +9,7 @@ description: >-
 argument-hint: '[plan] <pattern-id> [full | changed | component <path>] [--plan-only]'
 user-invocable: true
 disable-model-invocation: true
+allowed-tools: Read, Agent(oop-orchestrator)
 ---
 
 # Pattern Implementer
