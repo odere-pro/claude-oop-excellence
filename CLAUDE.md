@@ -38,7 +38,9 @@ This plugin ships no `hooks/` and no `.mcp.json` — it has no event hooks and n
 - `.claude/` — this repo's own project config (house rules, dev skills/agents)
 - `CLAUDE.md` (this file) — dev-repo memory, not user context
 - `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE` — docs
-- `SECURITY.md`, `CODE_OF_CONDUCT.md`, `SUPPORT.md`, `docs/` — governance docs (fill the `REPLACE-ME`s)
+- `SECURITY.md`, `CODE_OF_CONDUCT.md`, `SUPPORT.md` — governance docs (fill the `REPLACE-ME`s)
+- `docs/` — deep-dive user docs (`ARCHITECTURE.md`, `EXTENDING.md`, `LANGUAGE-COVERAGE.md`) plus
+  governance (`RELEASING.md`, `openssf-badge.md`); linked from README, not loaded into user context
 - `.github/` — CI/Scorecard/CodeQL/release workflows, Dependabot, CODEOWNERS (Scorecard & CodeQL are
   dormant until the repo is public — see the cookbook's `14-supply-chain-and-governance`)
 - `.editorconfig`, `.gitattributes`, `.gitignore`, `.markdownlint*.jsonc`, `.prettierrc` — repo config
