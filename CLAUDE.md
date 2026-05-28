@@ -16,8 +16,10 @@ directory under here ships to users when the plugin is installed.
   registry) and its lookup `SKILL.md`, plus the relocated patterns catalog docs (`PATTERNS.md`,
   `PATTERN-EXAMPLES.md`, `PATTERN-REFERENCE.md`)
 - `skills/` — `audit` (the single read-only front door; runs both the RISK and PATTERN tracks in
-  parallel into one unified report, every track / aspect / family / entity individually selectable)
-  and the side-effecting `improve` and `pattern-implement` (both `disable-model-invocation: true`)
+  parallel into one unified report, every track / aspect / family / entity individually selectable),
+  `onboarding` (read-only in-session orientation — the "how to use this plugin" guide; model-invocable
+  like `audit`/`glossary`), and the side-effecting `improve` and `pattern-implement` (both
+  `disable-model-invocation: true`)
 - `commands/` — flat `.md` skills: the report command(s) and the fix commands (`fix-risks`,
   `implement-patterns`, both `disable-model-invocation: true`). The `/oop-excellence`, `/risk-report`,
   and `/pattern-suggest` commands are retired — analysis is folded into `/audit`.
@@ -51,6 +53,17 @@ This plugin ships no `hooks/` and no `.mcp.json` — it has no event hooks and n
 | `agents/`              | worker subagents             | yes    |
 | `.claude/`             | dev-repo project config      | no     |
 | `tests/gates/`         | author-only CI gate suite    | no     |
+
+## Agents
+
+| Agent | Role |
+| --- | --- |
+| `oop-orchestrator` | Orchestrator — resolves the selection across both tracks and fans out workers, in parallel, into one unified report |
+| `entity-detector` | Detect one issue entity (read-only) |
+| `pattern-scanner` | Detect one design pattern already present (read-only) |
+| `pattern-suggester` | Evaluate fit for one design pattern (read-only) |
+| `entity-fixer` | Fix one issue entity, verified with the project's own detected commands |
+| `pattern-implementer` | Implement one pattern via a safe parallel-change sequence + tests |
 
 ## House rules
 

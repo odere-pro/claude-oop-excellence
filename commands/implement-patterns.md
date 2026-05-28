@@ -1,4 +1,5 @@
 ---
+name: implement-patterns
 description: >-
   Use to apply design patterns via the implement verb (pattern-implement → oop-orchestrator
   pattern-implement mode) — the gated IMPLEMENT front door the /audit report's Recommended Actions

@@ -6,7 +6,7 @@ description: >-
   detects instances by the entity's signs, applies the smallest corrective refactor guided by its
   corrective_patterns, then verifies with the project's own detected test/typecheck/lint commands.
   Honors --plan-only (no writes). Language-agnostic; never assumes a stack.
-tools: Read, Edit, Write, Grep, Glob, Bash
+tools: Read, Edit, Write, Grep, Glob, Bash(npm *), Bash(pnpm *), Bash(yarn *), Bash(npx *), Bash(make *), Bash(pytest *), Bash(python *), Bash(go *), Bash(cargo *), Bash(mvn *), Bash(gradle *), Bash(just *), Bash(rake *), Bash(composer *), Bash(dotnet *), Bash(tox *), Bash(ruff *), Bash(jest *), Bash(vitest *)
 model: sonnet
 effort: high
 maxTurns: 30

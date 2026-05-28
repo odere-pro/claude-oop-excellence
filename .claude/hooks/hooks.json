@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/scripts/block-secrets.sh\"",
+            "description": "Block writes that embed hardcoded secrets (MUST: no secrets in committed code)"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/scripts/block-large-files.sh\"",
+            "description": "Block writes that exceed 800-line file limit (MUST: files < 800 lines)"
+          }
+        ]
+      }
+    ]
+  }
+}

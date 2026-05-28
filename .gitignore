@@ -19,6 +19,10 @@ tmp/
 
 # Local, per-machine Claude Code permission state
 .claude/settings.local.json
+CLAUDE.local.md
+
+# Calibration run artifacts (never commit)
+.claude/calibration/
 
 # Release-workflow artifacts
 *.tar.gz

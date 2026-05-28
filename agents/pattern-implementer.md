@@ -1,7 +1,7 @@
 ---
 name: pattern-implementer
 description: Use to implement a single design pattern into a target scope with a safe parallel-change sequence, then verify with the project's own detected tests. The orchestrator injects one design-pattern record plus scope and an optional plan-only mode; this worker confirms the resolved issue is present, introduces the pattern alongside existing code, migrates call sites, removes the superseded path, and reports the upheld principles and the verification result.
-tools: Read, Edit, Write, Grep, Glob, Bash
+tools: Read, Edit, Write, Grep, Glob, Bash(npm *), Bash(pnpm *), Bash(yarn *), Bash(npx *), Bash(make *), Bash(pytest *), Bash(python *), Bash(go *), Bash(cargo *), Bash(mvn *), Bash(gradle *), Bash(just *), Bash(rake *), Bash(composer *), Bash(dotnet *), Bash(tox *), Bash(ruff *), Bash(jest *), Bash(vitest *)
 model: sonnet
 effort: high
 maxTurns: 30

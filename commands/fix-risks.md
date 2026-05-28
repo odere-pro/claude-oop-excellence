@@ -1,4 +1,5 @@
 ---
+name: fix-risks
 description: >-
   Use to fix risk findings via the fix verb (improve → oop-orchestrator fix mode) — the gated FIX
   action the /audit report's Recommended Actions hands off to. Resolves an entity selection against
