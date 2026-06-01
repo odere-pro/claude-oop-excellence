@@ -72,6 +72,19 @@ The report ends with a **Recommended Actions** section that prints the exact `/f
 `/implement-patterns` commands to run next, scoped to what it found. Nothing is modified until you
 run one of those yourself.
 
+## Uninstall
+
+Remove the plugin, then (optionally) drop the marketplace it came from:
+
+```text
+/plugin uninstall claude-oop-excellence@odere-pro
+/plugin marketplace remove odere-pro          # optional: also forget the marketplace
+```
+
+You can also manage both from the interactive `/plugin` menu. If you loaded it locally with
+`--plugin-dir`, just relaunch `claude` without that flag — there is nothing to uninstall. The plugin
+ships no hooks and no MCP server, so removing it leaves no background state behind.
+
 ## How it works
 
 One front door, two parallel analysis tracks, one unified report. `/audit` is the single read-only
@@ -195,3 +208,9 @@ agent file needed.
 | [docs/EXTENDING.md](docs/EXTENDING.md) | How to add a new entity to the glossary — full field reference + validation |
 | [docs/LANGUAGE-COVERAGE.md](docs/LANGUAGE-COVERAGE.md) | Why principle-based, what's exercised, how verification uses your project's own tooling |
 | [docs/RELEASING.md](docs/RELEASING.md) | Release process for plugin authors |
+
+---
+
+<p align="center">
+  <a href="https://odere-pro.github.io/claude-oop-excellence/">Claude OOP Excellence landing page</a>
+</p>
