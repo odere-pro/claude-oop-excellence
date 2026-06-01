@@ -212,5 +212,5 @@ agent file needed.
 ---
 
 <p align="center">
-  <a href="https://odere-pro.github.io/claude-oop-excellence/">claude-oop-excellence — project site on GitHub Pages</a>
+  <a href="https://odere-pro.github.io/claude-oop-excellence/">Claude OOP Excellence landing page</a>
 </p>
