@@ -1,0 +1,1407 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      claude-oop-excellence — audit, fix &amp; verify OO design in any language
+    </title>
+    <meta
+      name="description"
+      content="claude-oop-excellence is a Claude Code plugin that enforces good object-oriented design in any language. One read-only /audit front door runs two tracks in parallel — RISK (code smells, antipatterns, vulnerabilities, supply-chain risks) and PATTERN (existing-pattern scan + pattern-fit suggestions) — into one unified report, then hands off to gated, test-verified /fix-risks and /implement-patterns commands. Driven by a canonical glossary of 102 entities; principle-based, not a per-language matrix."
+    />
+    <link rel="canonical" href="https://odere-pro.github.io/claude-oop-excellence/" />
+    <meta name="theme-color" content="#1c1714" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="application-name" content="claude-oop-excellence" />
+    <meta name="author" content="odere" />
+    <meta
+      name="keywords"
+      content="claude code plugin, object oriented design, oop audit, code smells detector, antipatterns, design patterns, gof patterns, solid principles, refactoring tool, code quality audit, language agnostic, god class, feature envy, anemic domain model, strategy pattern, facade pattern, code review"
+    />
+    <meta
+      name="robots"
+      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+    />
+
+    <!-- Restrict origins; the only third party is the pinned, SRI-verified mermaid bundle. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'"
+    />
+
+    <link
+      rel="alternate"
+      hreflang="en"
+      href="https://odere-pro.github.io/claude-oop-excellence/"
+    />
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href="https://odere-pro.github.io/claude-oop-excellence/"
+    />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="claude-oop-excellence" />
+    <meta property="og:locale" content="en_US" />
+    <meta
+      property="og:title"
+      content="claude-oop-excellence — audit, fix & verify OO design in any language"
+    />
+    <meta
+      property="og:description"
+      content="A Claude Code plugin that audits a codebase for object-oriented design quality — one /audit front door runs RISK + PATTERN tracks in parallel into one unified report, then hands off to gated, test-verified fixes."
+    />
+    <meta property="og:url" content="https://odere-pro.github.io/claude-oop-excellence/" />
+    <meta
+      property="og:image"
+      content="https://odere-pro.github.io/claude-oop-excellence/assets/og-card.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta
+      property="og:image:alt"
+      content="claude-oop-excellence: enforce good object-oriented design in any language — audit, fix, verify, one unified report."
+    />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="claude-oop-excellence — audit, fix & verify OO design in any language"
+    />
+    <meta
+      name="twitter:description"
+      content="A Claude Code plugin that hunts God Classes, Feature Envy, antipatterns and vulnerabilities, then refactors toward sound design with GoF patterns — verified against your project's own tests."
+    />
+    <meta
+      name="twitter:image"
+      content="https://odere-pro.github.io/claude-oop-excellence/assets/og-card.png"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="The claude-oop-excellence flow: one /audit front door, RISK + PATTERN tracks in parallel, one unified report, gated test-verified fixes."
+    />
+
+    <!-- Structured data: describes the plugin and qualifies the FAQ and
+         install steps for rich results. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://odere-pro.github.io/claude-oop-excellence/#website",
+            "url": "https://odere-pro.github.io/claude-oop-excellence/",
+            "name": "claude-oop-excellence",
+            "description": "A Claude Code plugin that enforces good object-oriented design in any language — audit, fix, and verify against your project's own tests.",
+            "inLanguage": "en",
+            "publisher": { "@id": "https://github.com/odere-pro#organization" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://github.com/odere-pro#organization",
+            "name": "odere",
+            "url": "https://github.com/odere-pro/claude-oop-excellence",
+            "sameAs": ["https://github.com/odere-pro/claude-oop-excellence"]
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://odere-pro.github.io/claude-oop-excellence/#app",
+            "name": "claude-oop-excellence",
+            "applicationCategory": "DeveloperApplication",
+            "applicationSubCategory": "Claude Code Plugin",
+            "operatingSystem": "macOS, Linux, Windows (WSL)",
+            "description": "A Claude Code plugin that enforces good object-oriented design in any language. A single read-only /audit front door runs two analysis tracks in parallel — RISK (code smells, antipatterns, vulnerabilities, supply-chain risks) and PATTERN (existing-pattern scan + pattern-fit suggestions) — and merges them into one unified report; every layer (track / aspect / family / entity) is individually selectable. Driven by a canonical glossary of 102 entities (45 issues + 57 design patterns). The report's Recommended Actions hand off to gated, test-verified /fix-risks and /implement-patterns commands.",
+            "url": "https://odere-pro.github.io/claude-oop-excellence/",
+            "softwareHelp": "https://github.com/odere-pro/claude-oop-excellence#readme",
+            "softwareVersion": "0.1.1",
+            "license": "https://opensource.org/licenses/MIT",
+            "keywords": "claude code plugin, object oriented design, code smells, antipatterns, design patterns, gof, solid, refactoring, code quality, language agnostic, audit",
+            "featureList": [
+              "Audits a codebase for object-oriented design quality in any language — principle-based, not a per-language matrix",
+              "One read-only /audit front door runs RISK and PATTERN tracks in parallel into one unified report",
+              "Detects God Classes, Anemic Domain Models, Feature Envy and the rest, plus vulnerabilities and supply-chain risks",
+              "Scans for design patterns already present and suggests the most-suitable patterns to adopt",
+              "Driven by a canonical glossary of 102 entities — 45 issues and 57 design patterns",
+              "Glossary-driven workers fan out one per in-scope entity in parallel",
+              "Gated, test-verified fixes: /fix-risks and /implement-patterns run the project's own detected test/typecheck/lint commands",
+              "Zero standing context cost when idle — the side-effecting action skills are disable-model-invocation"
+            ],
+            "isAccessibleForFree": true,
+            "author": { "@id": "https://github.com/odere-pro#organization" },
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+          },
+          {
+            "@type": "HowTo",
+            "@id": "https://odere-pro.github.io/claude-oop-excellence/#install",
+            "name": "Install claude-oop-excellence for Claude Code",
+            "description": "Install the claude-oop-excellence plugin from the marketplace and run your first read-only audit in three steps.",
+            "totalTime": "PT2M",
+            "tool": [{ "@type": "HowToTool", "name": "Claude Code" }],
+            "step": [
+              {
+                "@type": "HowToStep",
+                "position": 1,
+                "name": "Add the marketplace",
+                "text": "In a Claude Code session run: /plugin marketplace add odere-pro/claude-oop-excellence"
+              },
+              {
+                "@type": "HowToStep",
+                "position": 2,
+                "name": "Install the plugin",
+                "text": "Run: /plugin install claude-oop-excellence@odere-pro"
+              },
+              {
+                "@type": "HowToStep",
+                "position": 3,
+                "name": "Run your first audit",
+                "text": "Run: /audit — a read-only pass over the whole project that never changes code. Try /audit changed for just the files changed vs the base branch."
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://odere-pro.github.io/claude-oop-excellence/#breadcrumbs",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://odere-pro.github.io/claude-oop-excellence/" },
+              { "@type": "ListItem", "position": 2, "name": "How it works", "item": "https://odere-pro.github.io/claude-oop-excellence/#how" },
+              { "@type": "ListItem", "position": 3, "name": "Commands", "item": "https://odere-pro.github.io/claude-oop-excellence/#commands" },
+              { "@type": "ListItem", "position": 4, "name": "Install", "item": "https://odere-pro.github.io/claude-oop-excellence/#install" }
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://odere-pro.github.io/claude-oop-excellence/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Does /audit change my code?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. /audit is read-only end to end — it never modifies code. It produces one unified report ending with a Recommended Actions section that prints the exact /fix-risks and /implement-patterns commands to run next. Nothing changes until you invoke one of those yourself."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What languages does claude-oop-excellence support?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Any language the model can read. Detection is principle-based — universal design principles (SOLID, Law of Demeter, DRY) plus language-neutral signs — not a per-language matrix. It works across TypeScript/JavaScript, Python, Java, Go, Rust, C#, and more, and verifies fixes using whatever test/typecheck/lint commands your project already defines."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Will the plugin bloat my context window?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "The side-effecting action skills (/fix-risks, /implement-patterns) are disable-model-invocation, so they cost no standing context. The worker subagents only cost tokens when an audit or action run spawns them, and they fan out one per in-scope entity in parallel."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How are fixes verified?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "/fix-risks and /implement-patterns run your project's own detected test, typecheck, and lint commands — e.g. npm test, pytest, make test, go test ./... — and verify each change before moving on. There is no single-language tooling assumption, and every change is applied through a safe, reviewable sequence."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What is the glossary?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "skills/glossary/glossary.json is the single source of truth — 102 entities: 45 issues (code smells, antipatterns, vulnerabilities, supply-chain risks) and 57 design patterns. Every detection sign, principle, severity, and cross-reference lives there, so adding coverage means appending to the glossary, not writing a new agent."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How do I uninstall claude-oop-excellence?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Run /plugin disable claude-oop-excellence to turn it off, or /plugin uninstall claude-oop-excellence to remove it entirely. The plugin keeps no project-side state of its own — your code and tests are the only artifacts it touches, and only through gated, user-invoked actions."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+
+    <style>
+      :root {
+        --color-bg: oklch(22% 0.012 50);
+        --color-bg-raised: oklch(27% 0.016 52);
+        --color-surface: oklch(31% 0.02 54);
+        --color-text: oklch(92% 0.012 70);
+        --color-muted: oklch(76% 0.022 62);
+        --color-accent: oklch(70% 0.13 45);
+        --color-accent-soft: oklch(70% 0.13 45 / 0.16);
+        --color-accent-line: oklch(70% 0.13 45 / 0.4);
+        --color-line: oklch(40% 0.02 55);
+
+        --text-hero: clamp(2.6rem, 1.4rem + 5vw, 5.5rem);
+        --text-lead: clamp(1.1rem, 0.96rem + 0.6vw, 1.4rem);
+        --text-h2: clamp(1.6rem, 1.2rem + 1.5vw, 2.4rem);
+        --space-section: clamp(3.5rem, 2.5rem + 5vw, 7rem);
+
+        --radius: 14px;
+        --radius-sm: 9px;
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+        --font-sans:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "SF Mono", "JetBrains Mono", "Fira Code", Menlo, Consolas,
+          monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 5rem;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(
+            120% 80% at 75% -10%,
+            var(--color-accent-soft),
+            transparent 60%
+          ),
+          var(--color-bg);
+        color: var(--color-text);
+        font-family: var(--font-sans);
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 3px;
+        border-radius: 4px;
+      }
+
+      .wrap {
+        width: min(1100px, 92vw);
+        margin-inline: auto;
+      }
+
+      .vh {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      .skip-link {
+        position: absolute;
+        left: 0.5rem;
+        top: 0.5rem;
+        z-index: 50;
+        transform: translateY(-160%);
+        background: var(--color-accent);
+        color: oklch(20% 0.02 50);
+        padding: 0.6rem 1rem;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        text-decoration: none;
+        transition: transform var(--ease) 200ms;
+      }
+
+      .skip-link:focus {
+        transform: translateY(0);
+      }
+
+      /* Header / nav */
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        background: oklch(22% 0.012 50 / 0.82);
+        backdrop-filter: saturate(140%) blur(10px);
+        border-bottom: 1px solid var(--color-line);
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.4rem 1.2rem;
+        padding-block: 0.9rem;
+      }
+
+      .brand {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 1.15rem;
+        letter-spacing: -0.02em;
+        text-decoration: none;
+      }
+
+      .brand span {
+        color: var(--color-accent);
+      }
+
+      nav .spacer {
+        flex: 1;
+      }
+
+      nav a:not(.brand) {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding-inline: 0.35rem;
+        text-decoration: none;
+        color: var(--color-muted);
+        font-size: 0.95rem;
+        transition: color var(--ease) 200ms;
+      }
+
+      nav a:not(.brand):hover,
+      nav a:not(.brand):focus-visible {
+        color: var(--color-text);
+      }
+
+      /* Hero */
+      .hero {
+        padding-block: var(--space-section);
+      }
+
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--color-accent);
+        margin: 0 0 1.2rem;
+      }
+
+      h1 {
+        font-size: var(--text-hero);
+        line-height: 0.98;
+        letter-spacing: -0.03em;
+        margin: 0 0 1.4rem;
+        max-width: 20ch;
+      }
+
+      .lead {
+        font-size: var(--text-lead);
+        color: var(--color-muted);
+        max-width: 60ch;
+        margin: 0 0 1.8rem;
+      }
+
+      .pills {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin: 0 0 2rem;
+        padding: 0;
+      }
+
+      .pills li {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--color-text);
+        background: var(--color-surface);
+        border: 1px solid var(--color-line);
+        border-radius: 999px;
+        padding: 0.35rem 0.85rem;
+      }
+
+      .cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.9rem;
+        align-items: center;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.4rem;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 600;
+        transition:
+          transform var(--ease) 200ms,
+          background var(--ease) 200ms;
+      }
+
+      .btn-primary {
+        background: var(--color-accent);
+        color: oklch(20% 0.02 50);
+      }
+
+      .btn-primary:hover,
+      .btn-primary:focus-visible {
+        transform: translateY(-2px);
+      }
+
+      .btn-ghost {
+        border: 1px solid var(--color-line);
+        color: var(--color-text);
+      }
+
+      .btn-ghost:hover,
+      .btn-ghost:focus-visible {
+        background: var(--color-surface);
+        transform: translateY(-2px);
+      }
+
+      /* Shared section chrome */
+      section.band {
+        padding-block: var(--space-section);
+        border-top: 1px solid var(--color-line);
+      }
+
+      .h2 {
+        font-size: var(--text-h2);
+        letter-spacing: -0.02em;
+        margin: 0 0 0.6rem;
+      }
+
+      .section-lead {
+        color: var(--color-muted);
+        max-width: 64ch;
+        margin: 0 0 2.6rem;
+        font-size: 1.02rem;
+      }
+
+      .kicker {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--color-accent);
+        margin: 0 0 0.8rem;
+      }
+
+      /* Generic card grid */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+        gap: 1px;
+        background: var(--color-line);
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      .card {
+        background: var(--color-bg-raised);
+        padding: 1.6rem 1.5rem;
+      }
+
+      .card h3 {
+        margin: 0 0 0.5rem;
+        font-size: 1.05rem;
+        font-family: var(--font-mono);
+        color: var(--color-accent);
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 0.96rem;
+      }
+
+      /* Two-mode split */
+      .modes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+      }
+
+      .mode {
+        background: var(--color-bg-raised);
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius);
+        padding: 1.6rem 1.5rem;
+      }
+
+      .mode h3 {
+        margin: 0 0 0.6rem;
+        font-size: 1.18rem;
+        letter-spacing: -0.01em;
+      }
+
+      .mode p {
+        margin: 0 0 1rem;
+        color: var(--color-muted);
+        font-size: 0.97rem;
+      }
+
+      .mode .tags {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin: 0;
+        padding: 0;
+      }
+
+      .mode .tags li {
+        font-family: var(--font-mono);
+        font-size: 0.74rem;
+        color: var(--color-text);
+        background: var(--color-surface);
+        border: 1px solid var(--color-line);
+        border-radius: 6px;
+        padding: 0.18rem 0.5rem;
+      }
+
+      /* Diagram */
+      .diagram {
+        background: var(--color-bg-raised);
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius);
+        padding: 1.6rem;
+        overflow-x: auto;
+        margin: 0 0 1.6rem;
+      }
+
+      .diagram .mermaid {
+        margin: 0;
+        text-align: center;
+      }
+
+      .diagram .mermaid svg {
+        max-width: 100%;
+        height: auto;
+      }
+
+      /* Worked example / callout */
+      .worked {
+        background: var(--color-bg-raised);
+        border: 1px solid var(--color-line);
+        border-left: 3px solid var(--color-accent);
+        border-radius: var(--radius);
+        padding: 1.6rem 1.6rem 1.4rem;
+      }
+
+      .worked p {
+        margin: 0 0 1rem;
+        color: var(--color-text);
+      }
+
+      .worked ol {
+        margin: 0;
+        padding-left: 1.2rem;
+        color: var(--color-muted);
+        display: grid;
+        gap: 0.5rem;
+      }
+
+      .worked code {
+        font-family: var(--font-mono);
+        color: var(--color-text);
+      }
+
+      /* Command table */
+      .table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius);
+      }
+
+      table.cmd {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+        background: var(--color-bg-raised);
+      }
+
+      table.cmd th,
+      table.cmd td {
+        text-align: left;
+        padding: 0.85rem 1.1rem;
+        border-bottom: 1px solid var(--color-line);
+        vertical-align: top;
+      }
+
+      table.cmd tr:last-child td {
+        border-bottom: 0;
+      }
+
+      table.cmd th {
+        color: var(--color-muted);
+        font-weight: 600;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      table.cmd td code {
+        font-family: var(--font-mono);
+        color: var(--color-accent);
+        white-space: nowrap;
+      }
+
+      table.cmd td:last-child {
+        color: var(--color-muted);
+      }
+
+      /* Code blocks */
+      pre {
+        margin: 0;
+        padding: 1.4rem 1.5rem;
+        background: oklch(16% 0.01 50);
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius);
+        max-width: 100%;
+        overflow-x: auto;
+        font-family: var(--font-mono);
+        font-size: 0.95rem;
+        line-height: 1.7;
+        color: var(--color-text);
+      }
+
+      pre .cmt {
+        color: var(--color-muted);
+      }
+
+      .stack {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.2rem;
+      }
+
+      .stack > * {
+        min-width: 0;
+      }
+
+      .install-note {
+        background: var(--color-accent-soft);
+        border: 1px solid var(--color-accent-line);
+        border-radius: var(--radius);
+        padding: 1.1rem 1.3rem;
+        color: var(--color-text);
+        font-size: 0.96rem;
+      }
+
+      .install-note strong {
+        color: var(--color-accent);
+      }
+
+      .install-note code,
+      .faq code {
+        font-family: var(--font-mono);
+        color: var(--color-text);
+      }
+
+      .sub {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin: 2rem 0 0.7rem;
+      }
+
+      /* FAQ */
+      .faq dl {
+        margin: 0;
+        display: grid;
+        gap: 1.6rem;
+      }
+
+      .faq dt {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .faq dd {
+        margin: 0;
+        color: var(--color-muted);
+        max-width: 74ch;
+      }
+
+      /* Footer */
+      footer {
+        padding-block: 2.5rem;
+        border-top: 1px solid var(--color-line);
+        color: var(--color-muted);
+        font-size: 0.9rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 1rem;
+        align-items: center;
+      }
+
+      footer .spacer {
+        flex: 1;
+      }
+
+      footer a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding-inline: 0.35rem;
+        color: var(--color-muted);
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        color: var(--color-text);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header>
+      <nav class="wrap" aria-label="Primary">
+        <a class="brand" href="#main">claude-<span>oop-excellence</span></a>
+        <span class="spacer"></span>
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#commands">Commands</a>
+        <a href="#use-cases">Use cases</a>
+        <a href="#install">Install</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://github.com/odere-pro/claude-oop-excellence">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero wrap" aria-labelledby="hero-heading">
+        <p class="eyebrow">A plugin for Claude Code · audit → fix → verify</p>
+        <h1 id="hero-heading">
+          Enforce good object-oriented design — in any language.
+        </h1>
+        <p class="lead">
+          <strong>claude-oop-excellence</strong> hunts God Classes, Anemic Domain
+          Models, Feature Envy and the rest, then refactors toward sound design with
+          GoF patterns. One read-only <code>/audit</code> front door runs two
+          tracks in parallel — <strong>RISK</strong> and <strong>PATTERN</strong> —
+          into one unified report, then hands off to gated, test-verified fixes. No
+          framework, stack, or paradigm lock-in.
+        </p>
+        <ul class="pills" aria-label="Highlights">
+          <li>102 entities</li>
+          <li>RISK + PATTERN tracks</li>
+          <li>principle-based, any language</li>
+          <li>test-verified fixes</li>
+          <li>read-only by default</li>
+          <li>MIT</li>
+        </ul>
+        <div class="cta">
+          <a class="btn btn-primary" href="#install">Get started</a>
+          <a class="btn btn-ghost" href="#how">See how it works</a>
+        </div>
+      </section>
+
+      <!-- HOW IT WORKS -->
+      <section class="band" id="how" aria-labelledby="how-heading">
+        <div class="wrap">
+          <p class="kicker">How it works</p>
+          <h2 class="h2" id="how-heading">One front door, two tracks, one report</h2>
+          <p class="section-lead">
+            <code>/audit</code> is the single read-only entry point. It resolves a
+            selector against the glossary and fans workers out per in-scope entity in
+            parallel — the <strong>RISK</strong> track for issues and the
+            <strong>PATTERN</strong> track for patterns — merging everything into one
+            unified report that ends with a gated handoff to two user-invoked action
+            commands.
+          </p>
+
+          <figure class="diagram">
+            <pre class="mermaid" aria-hidden="true">
+flowchart TD
+    A[/"audit — read-only front door<br/>resolves selector against glossary.json"/]
+    subgraph L2["L2 · two parallel tracks"]
+      R["RISK track<br/>antipatterns · smells · vulns · supply-chain"]
+      P["PATTERN track"]
+      PS["scan · patterns already present"]
+      PF["fit · most-suitable suggestions"]
+      P --> PS
+      P --> PF
+    end
+    subgraph L3["L3 · workers, one per in-scope entity, parallel"]
+      WD["entity-detector"]
+      WS["pattern-scanner"]
+      WF["pattern-suggester"]
+    end
+    A --> R
+    A --> P
+    R --> WD
+    PS --> WS
+    PF --> WF
+    WD --> U(["ONE unified report"])
+    WS --> U
+    WF --> U
+    U --> RA["Recommended Actions<br/>prints exact gated commands"]
+    RA -. gated, user-invoked .-> ACT[/"fix-risks · implement-patterns"/]
+
+    classDef accent fill:#3a2a20,stroke:#e0855f,color:#f3e7df;
+    class U,ACT accent;
+            </pre>
+            <figcaption class="vh">
+              Flowchart: the read-only /audit front door resolves a selector against
+              glossary.json, then fans out into two parallel tracks. The RISK track
+              detects antipatterns, code smells, vulnerabilities and supply-chain
+              risks; the PATTERN track has two aspects — scan, for design patterns
+              already present, and fit, for the most-suitable pattern suggestions.
+              Each track spawns workers — entity-detector, pattern-scanner and
+              pattern-suggester — one per in-scope entity in parallel. All of them
+              merge into one unified report, which ends with a Recommended Actions
+              section that prints the exact gated commands; those hand off, only when
+              you invoke them, to /fix-risks and /implement-patterns.
+            </figcaption>
+          </figure>
+
+          <div class="worked">
+            <p>
+              <code>/audit</code> stays read-only end to end — the
+              <strong>action layer is separate, gated, and user-invoked</strong>. A
+              typical analyze → act loop, with <code>oop</code> as the spine that is
+              fixed before other families:
+            </p>
+            <ol>
+              <li>
+                <code>/audit</code> flags a <code>god-class</code> hotspot and, on the
+                PATTERN track, suggests Extract Class plus a <code>facade</code> to
+                tame the call sites.
+              </li>
+              <li>
+                The report's <strong>Recommended Actions</strong> print the exact
+                next command — <code>/fix-risks god-class component src/</code> —
+                scoped to what it found.
+              </li>
+              <li>
+                You run it; <code>entity-fixer</code> refactors entity by entity and
+                verifies every change against your project's
+                <strong>own detected</strong> test, typecheck, and lint commands
+                before moving on.
+              </li>
+            </ol>
+          </div>
+
+          <div class="modes">
+            <article class="mode">
+              <h3>The RISK track</h3>
+              <p>
+                Finds what's wrong: code smells, antipatterns, vulnerabilities, and
+                supply-chain risks — graded by severity and correlated into hotspots
+                in the unified report.
+              </p>
+              <ul class="tags">
+                <li>/audit risks</li>
+                <li>code smells</li>
+                <li>antipatterns</li>
+                <li>vulnerabilities</li>
+                <li>supply-chain</li>
+              </ul>
+            </article>
+            <article class="mode">
+              <h3>The PATTERN track</h3>
+              <p>
+                Two aspects: <strong>scan</strong> reports the design patterns already
+                present, and <strong>fit</strong> suggests the most-suitable patterns
+                to adopt — Strategy, Facade, Decorator and the rest of the GoF
+                catalog.
+              </p>
+              <ul class="tags">
+                <li>/audit patterns</li>
+                <li>pattern-scan</li>
+                <li>pattern-fit</li>
+                <li>57 design patterns</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- FEATURES -->
+      <section class="band" id="features" aria-labelledby="features-heading">
+        <div class="wrap">
+          <p class="kicker">What it finds</p>
+          <h2 class="h2" id="features-heading">102 entities, one parallel pass</h2>
+          <p class="section-lead">
+            Detection is driven by a canonical glossary —
+            <strong>45 issues and 57 design patterns</strong>. A full
+            <code>/audit</code> fans out one worker per in-scope entity, so a complete
+            baseline is a single wall-clock pass.
+          </p>
+          <div class="grid">
+            <article class="card">
+              <h3>OOP smells</h3>
+              <p>
+                God Class, Anemic Domain Model, Feature Envy, Inappropriate Intimacy,
+                Refused Bequest — the structural smells that erode encapsulation and
+                cohesion. <code>oop</code> is the spine, fixed first.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Antipatterns</h3>
+              <p>
+                Spaghetti code, circular dependencies, the Yo-Yo problem, and other
+                design-level antipatterns caught by universal principles — SOLID, Law
+                of Demeter, DRY — not a per-language matrix.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Vulnerabilities</h3>
+              <p>
+                The security family: injection, unsafe deserialization, secrets in
+                source, and the OWASP-style risks that surface from language-neutral
+                signs in any codebase.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Supply-chain risks</h3>
+              <p>
+                Dependency and build-surface risks — unpinned or risky dependencies
+                and the supply-chain weaknesses that don't show up in the application
+                logic itself.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Pattern scan</h3>
+              <p>
+                The PATTERN track's <code>scan</code> aspect reports the design
+                patterns <em>already present</em> — Strategy, Observer, Factory,
+                Adapter — so you can see the design you actually have.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Pattern fit</h3>
+              <p>
+                The <code>fit</code> aspect suggests the <em>most-suitable</em>
+                patterns to adopt where they'd help — from creational and structural
+                to behavioral, architectural, and DDD.
+              </p>
+            </article>
+          </div>
+
+          <p class="kicker" style="margin-top: 2.6rem">What makes it excellence</p>
+          <div class="grid">
+            <article class="card">
+              <h3>glossary-driven</h3>
+              <p>
+                <code>glossary.json</code> is the single source of truth — 102
+                entities with detection signs, principles, severity, and
+                cross-references. Add coverage by appending, not by writing agents.
+              </p>
+            </article>
+            <article class="card">
+              <h3>principle-based</h3>
+              <p>
+                Detection lives as universal design principles plus language-neutral
+                signs — so it works in any language the model can read, with no
+                per-language matrix to maintain.
+              </p>
+            </article>
+            <article class="card">
+              <h3>parallel fan-out</h3>
+              <p>
+                The orchestrator selects in-scope entities and fans one generic worker
+                out per entity in parallel, batched by family — a full baseline in one
+                pass.
+              </p>
+            </article>
+            <article class="card">
+              <h3>one unified report</h3>
+              <p>
+                RISK and PATTERN findings merge into a single report with scoring,
+                hotspots, and correlations — and a Recommended Actions handoff with
+                real selectors and paths.
+              </p>
+            </article>
+            <article class="card">
+              <h3>test-verified fixes</h3>
+              <p>
+                <code>/fix-risks</code> and <code>/implement-patterns</code> run your
+                project's <strong>own detected</strong> test/typecheck/lint command and
+                verify each change before moving on.
+              </p>
+            </article>
+            <article class="card">
+              <h3>gated &amp; read-only</h3>
+              <p>
+                <code>/audit</code> never modifies code. The action commands are
+                <code>disable-model-invocation</code> — Claude never refactors on its
+                own; you invoke a fix by name.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMMANDS -->
+      <section class="band" id="commands" aria-labelledby="commands-heading">
+        <div class="wrap">
+          <p class="kicker">Commands</p>
+          <h2 class="h2" id="commands-heading">One selector, every layer</h2>
+          <p class="section-lead">
+            <code>/audit</code> resolves a <strong>selector</strong> against the
+            glossary and zooms across three layers — <strong>track → aspect →
+            family / category / entity</strong>. Each selector takes an optional scope
+            suffix: <code>full</code> (default), <code>changed</code> (vs the base
+            branch), or <code>component &lt;path&gt;</code> (a single subtree).
+          </p>
+          <div class="table-wrap">
+            <table class="cmd">
+              <thead>
+                <tr>
+                  <th scope="col">Selector</th>
+                  <th scope="col">Resolves to</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>/audit [scope]</code></td>
+                  <td>L1 (full) — <strong>both tracks in parallel</strong>, one unified report.</td>
+                </tr>
+                <tr>
+                  <td><code>/audit risks</code></td>
+                  <td>RISK track only (alias: <code>/audit risk-scan</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>/audit patterns</code></td>
+                  <td>PATTERN track — both aspects (scan + fit).</td>
+                </tr>
+                <tr>
+                  <td><code>/audit pattern-scan</code></td>
+                  <td>Design patterns <strong>already present</strong>.</td>
+                </tr>
+                <tr>
+                  <td><code>/audit pattern-fit</code></td>
+                  <td><strong>Most-suitable</strong> pattern suggestions.</td>
+                </tr>
+                <tr>
+                  <td><code>/audit &lt;category&gt;</code></td>
+                  <td>One category — e.g. <code>vulnerability</code>, <code>design-pattern</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>/audit &lt;family&gt;</code></td>
+                  <td>One family — e.g. <code>oop</code>, <code>security</code>, <code>behavioral</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>/audit &lt;entity-id&gt;</code></td>
+                  <td>A single entity or pattern — e.g. <code>god-class</code>, <code>strategy</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="sub">Take action — gated, user-invoked only</p>
+          <div class="table-wrap">
+            <table class="cmd">
+              <thead>
+                <tr>
+                  <th scope="col">Command</th>
+                  <th scope="col">What it does</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>/fix-risks &lt;selector&gt; [scope]</code></td>
+                  <td>
+                    Fixes risk findings entity by entity via
+                    <code>entity-fixer</code> (OOP first), verified with the project's
+                    own detected commands.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>/implement-patterns &lt;selector&gt; [scope]</code></td>
+                  <td>
+                    Adopts suggested patterns via <code>pattern-implementer</code>,
+                    applied through a safe parallel-change sequence + tests.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>glossary</code></td>
+                  <td>
+                    Resolve any entity by id, list a family or category, or follow
+                    cross-references. Read-only.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>onboarding</code></td>
+                  <td>
+                    In-session orientation — the mental model and analyze → act flow.
+                    Read-only.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="section-lead" style="margin-top: 1.6rem">
+            Common runs: <code>/audit</code>,
+            <code>/audit changed</code>,
+            <code>/audit risks</code>,
+            <code>/audit pattern-fit</code>,
+            <code>/audit god-class component src/</code>.
+          </p>
+        </div>
+      </section>
+
+      <!-- USE CASES -->
+      <section class="band" id="use-cases" aria-labelledby="use-cases-heading">
+        <div class="wrap">
+          <p class="kicker">Use cases</p>
+          <h2 class="h2" id="use-cases-heading">When to reach for it</h2>
+          <div class="grid">
+            <article class="card">
+              <h3>Inherited a messy codebase</h3>
+              <p>
+                <code>/audit</code> gives one read-only, unified picture — smells,
+                antipatterns, vulnerabilities, and the patterns already in play —
+                before you touch a line.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Reviewing a pull request</h3>
+              <p>
+                <code>/audit changed</code> scopes the whole run to just the files
+                changed vs the base branch — a design-quality gate for the diff under
+                review.
+              </p>
+            </article>
+            <article class="card">
+              <h3>A God Class hotspot</h3>
+              <p>
+                Once the report flags it, <code>/fix-risks god-class</code> refactors
+                it entity by entity and verifies each step against your own tests.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Adopt the right patterns</h3>
+              <p>
+                <code>/audit pattern-fit</code> names the most-suitable patterns; then
+                <code>/implement-patterns</code> adopts them through a safe
+                parallel-change sequence.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Security &amp; supply-chain sweep</h3>
+              <p>
+                <code>/audit security</code> narrows the RISK track to vulnerabilities
+                and supply-chain risks — language-neutral signs, any stack.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Focus on one subtree</h3>
+              <p>
+                <code>/audit &lt;selector&gt; component src/</code> scopes any run to a
+                single directory — handy for a service, a module, or a package you
+                own.
+              </p>
+            </article>
+            <article class="card">
+              <h3>CI / pre-merge gate</h3>
+              <p>
+                <code>/audit changed</code> is read-only end to end — run it on every
+                PR to catch design regressions before they ship.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Onboarding to the plugin</h3>
+              <p>
+                <code>/onboarding</code> gives a read-only, in-session tour of the
+                mental model and the analyze → act flow — no docs to read first.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- INSTALL -->
+      <section class="band" id="install" aria-labelledby="install-heading">
+        <div class="wrap">
+          <p class="kicker">Get started</p>
+          <h2 class="h2" id="install-heading">Install in two commands</h2>
+          <div class="stack">
+            <pre><code><span class="cmt"># In a Claude Code session — add the marketplace, then install</span>
+/plugin marketplace add odere-pro/claude-oop-excellence
+/plugin install claude-oop-excellence@odere-pro
+
+<span class="cmt"># Run your first audit — read-only, never changes code</span>
+/audit                 <span class="cmt"># whole project: both tracks, one unified report</span>
+/audit changed         <span class="cmt"># only files changed vs the base branch</span>
+/audit god-class       <span class="cmt"># a single entity</span></code></pre>
+
+            <div class="install-note">
+              <strong>Read-only by default.</strong> <code>/audit</code> never modifies
+              code — it ends with a <strong>Recommended Actions</strong> section that
+              prints the exact <code>/fix-risks</code> and
+              <code>/implement-patterns</code> commands to run next. Those actions are
+              <code>disable-model-invocation</code> (user-invoked only) and verify every
+              change against your project's <em>own</em> tests before moving on.
+            </div>
+
+            <pre><code><span class="cmt"># Or load a local checkout for one session (development)</span>
+claude --plugin-dir /path/to/claude-oop-excellence
+<span class="cmt"># then, in-session:</span>
+/reload-plugins
+
+<span class="cmt"># Verify the install</span>
+/plugin        <span class="cmt"># confirms claude-oop-excellence is enabled</span>
+/skills        <span class="cmt"># /audit, glossary, onboarding registered</span>
+/agents        <span class="cmt"># the oop-orchestrator + workers registered</span>
+/context       <span class="cmt"># confirms ~zero idle context cost</span></code></pre>
+
+            <p class="sub">New here?</p>
+            <pre><code><span class="cmt"># A read-only, in-session guided tour before you dive in</span>
+/onboarding</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="band faq" id="faq" aria-labelledby="faq-heading">
+        <div class="wrap">
+          <p class="kicker">Questions</p>
+          <h2 class="h2" id="faq-heading">Frequently asked questions</h2>
+          <dl>
+            <dt>Does <code>/audit</code> change my code?</dt>
+            <dd>
+              No. <code>/audit</code> is read-only end to end — it never modifies code.
+              It produces one unified report ending with a Recommended Actions section
+              that prints the exact <code>/fix-risks</code> and
+              <code>/implement-patterns</code> commands to run next. Nothing changes
+              until you invoke one of those yourself.
+            </dd>
+
+            <dt>What languages does it support?</dt>
+            <dd>
+              Any language the model can read. Detection is principle-based — universal
+              design principles (SOLID, Law of Demeter, DRY) plus language-neutral
+              signs — not a per-language matrix. It works across TypeScript/JavaScript,
+              Python, Java, Go, Rust, C# and more, and verifies fixes using whatever
+              test/typecheck/lint commands your project already defines.
+            </dd>
+
+            <dt>Will the plugin bloat my context window?</dt>
+            <dd>
+              The side-effecting action skills (<code>/fix-risks</code>,
+              <code>/implement-patterns</code>) are
+              <code>disable-model-invocation</code>, so they cost no standing context.
+              The worker subagents only cost tokens when an audit or action run spawns
+              them, and they fan out one per in-scope entity in parallel.
+            </dd>
+
+            <dt>How are fixes verified?</dt>
+            <dd>
+              <code>/fix-risks</code> and <code>/implement-patterns</code> run your
+              project's <strong>own detected</strong> test, typecheck, and lint
+              commands — e.g. <code>npm test</code>, <code>pytest</code>,
+              <code>make test</code>, <code>go test ./...</code> — and verify each
+              change before moving on. There is no single-language tooling assumption.
+            </dd>
+
+            <dt>What is the glossary?</dt>
+            <dd>
+              <code>skills/glossary/glossary.json</code> is the single source of truth —
+              102 entities: 45 issues (code smells, antipatterns, vulnerabilities,
+              supply-chain risks) and 57 design patterns. Every detection sign,
+              principle, severity, and cross-reference lives there, so adding coverage
+              means appending to the glossary, not writing a new agent.
+            </dd>
+
+            <dt>How do I uninstall it?</dt>
+            <dd>
+              <code>/plugin disable claude-oop-excellence</code> turns it off;
+              <code>/plugin uninstall claude-oop-excellence</code> removes it entirely.
+              The plugin keeps no project-side state of its own — your code and tests
+              are the only artifacts it touches, and only through gated, user-invoked
+              actions.
+            </dd>
+          </dl>
+        </div>
+      </section>
+    </main>
+
+    <footer class="wrap">
+      <span>MIT licensed · v0.1.1</span>
+      <span class="spacer"></span>
+      <a href="https://github.com/odere-pro/claude-oop-excellence">GitHub</a>
+      <a href="https://github.com/odere-pro/claude-oop-excellence#readme">Docs</a>
+      <a href="https://github.com/odere-pro/claude-oop-excellence/issues">Issues</a>
+    </footer>
+
+    <!-- Pinned, SRI-verified mermaid bundle; the only third-party asset. -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"
+      integrity="sha384-rbtjAdnIQE/aQJGEgXrVUlMibdfTSa4PQju4HDhN3sR2PmaKFzhEafuePsl9H/9I"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+      defer
+    ></script>
+    <script>
+      // Render the flow diagram once the deferred bundle and DOM are ready.
+      // If mermaid fails to load, the visually-hidden figcaption still describes
+      // the flow for assistive tech and crawlers.
+      window.addEventListener("DOMContentLoaded", function () {
+        if (!window.mermaid) return;
+        var reduce = window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
+        window.mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: "strict",
+          theme: "base",
+          flowchart: { useMaxWidth: true, curve: "basis" },
+          themeVariables: {
+            background: "#221b18",
+            primaryColor: "#2e2620",
+            primaryTextColor: "#f0e7df",
+            primaryBorderColor: "#5c5048",
+            secondaryColor: "#3a3029",
+            tertiaryColor: "#2e2620",
+            lineColor: "#b9a99c",
+            textColor: "#f0e7df",
+            mainBkg: "#2e2620",
+            nodeBorder: "#5c5048",
+            clusterBkg: "#221b18",
+            fontFamily:
+              "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+            fontSize: "14px"
+          }
+        });
+        try {
+          window.mermaid.run({ querySelector: ".mermaid" });
+        } catch (e) {
+          /* leave the text fallback in place */
+        }
+      });
+    </script>
+  </body>
+</html>

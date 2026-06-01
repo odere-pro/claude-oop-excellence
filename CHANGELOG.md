@@ -6,6 +6,8 @@ All notable changes to this plugin are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-06-01
+
 ### Added
 
 - A read-only `onboarding` skill (`skills/onboarding/SKILL.md`) — an in-session orientation to
@@ -15,6 +17,13 @@ All notable changes to this plugin are documented here. The format follows
   README's "Quick start" + "How it works"; points to the `glossary` and README for depth.
   Model-invocable (like `audit` and `glossary`) so it can fire when a new user asks how to use
   the plugin. Changes nothing.
+- A standalone landing page under `site/` (`index.html`, `robots.txt`, `sitemap.xml`, and
+  `assets/`), published to GitHub Pages by `.github/workflows/pages.yml`. A zero-build,
+  single-file marketing/SEO surface — reuses the warm-dark design system from the sibling
+  `claude-calibration` site, with full Open Graph / Twitter / JSON-LD structured data and a
+  WCAG-AA accessibility baseline (skip link, semantic sections, focus-visible, reduced-motion).
+  Author-only: it ships into the plugin cache but is never loaded as a Claude Code component dir,
+  so it costs nothing at runtime. One-time setup: repo Settings → Pages → Source = "GitHub Actions".
 
 ## [0.1.0] - 2026-05-27
 
