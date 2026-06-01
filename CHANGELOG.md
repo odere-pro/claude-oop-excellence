@@ -6,6 +6,17 @@ All notable changes to this plugin are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- README accuracy and structure. Corrected the surface description: the plugin ships **five skills**
+  (`/audit`, `/glossary`, `/onboarding`, `/improve`, `/pattern-implement`), not two, and the two
+  gated commands (`/fix-risks`, `/implement-patterns`) are now documented as thin front doors that
+  delegate to the `improve` / `pattern-implement` action skills. Split the entry points into separate
+  **Commands** and **Skills** sections, removed the redundant "Notes" and "Further reading" sections,
+  de-duplicated repeated links (each `docs/*` linked once; `RELEASING` and the landing page in the
+  footer), and reordered for flow (Uninstall moved to the end). No code, glossary, or component
+  changes — docs only.
+
 ## [0.1.1] - 2026-06-01
 
 ### Added
