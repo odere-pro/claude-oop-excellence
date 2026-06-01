@@ -19,8 +19,8 @@
 
 It hunts God Classes, Anemic Domain Models, Feature Envy and the rest, then refactors toward sound
 design with GoF patterns (Strategy, Facade, Decorator…). Around that OOP spine sits a complete
-**analyze → act** pipeline: one read-only front door, one unified report, and guided changes
-verified against your project's own tests. No framework, stack, or paradigm lock-in.
+**analyze → act** pipeline: one read-only front door, one unified report, and guided changes verified
+against your project's own tests. No framework, stack, or paradigm lock-in.
 
 Two properties make it work:
 
@@ -35,10 +35,10 @@ Two properties make it work:
 - [Quick start](#quick-start)
 - [How it works](#how-it-works)
 - [Using `/audit`](#using-audit)
-- [Taking action](#taking-action)
-- [Lookups & agents](#lookups--agents)
-- [Notes](#notes)
-- [Further reading](#further-reading)
+- [Commands](#commands)
+- [Skills](#skills)
+- [Agents](#agents)
+- [Uninstall](#uninstall)
 
 ## Quick start
 
@@ -68,28 +68,14 @@ Then run your first audit — it is **read-only** and never changes code:
 /audit god-class       # a single entity
 ```
 
-The report ends with a **Recommended Actions** section that prints the exact `/fix-risks` and
-`/implement-patterns` commands to run next, scoped to what it found. Nothing is modified until you
-run one of those yourself.
-
-## Uninstall
-
-Remove the plugin, then (optionally) drop the marketplace it came from:
-
-```text
-/plugin uninstall claude-oop-excellence@odere-pro
-/plugin marketplace remove odere-pro          # optional: also forget the marketplace
-```
-
-You can also manage both from the interactive `/plugin` menu. If you loaded it locally with
-`--plugin-dir`, just relaunch `claude` without that flag — there is nothing to uninstall. The plugin
-ships no hooks and no MCP server, so removing it leaves no background state behind.
+The report ends with a **Recommended Actions** section that prints the exact gated commands to run
+next, scoped to what it found. Nothing is modified until you run one of those yourself.
 
 ## How it works
 
 One front door, two parallel analysis tracks, one unified report. `/audit` is the single read-only
 entry point — every layer is reachable through the same selector, and the report ends with a gated
-handoff to two user-invoked action commands.
+handoff to two user-invoked commands.
 
 ```mermaid
 flowchart TD
@@ -119,26 +105,26 @@ flowchart TD
   RA -. gated, user-invoked .-> ACT[/fix-risks &nbsp; · &nbsp; /implement-patterns/]
 ```
 
-A full `/audit` is read-only end to end. The action layer is itself parallel and layered, but stays
-**gated and user-invoked** — `/fix-risks` and `/implement-patterns` are `disable-model-invocation`;
-Claude never refactors on its own. Architecture deep dive in
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+The diagram is the **read-only analysis flow**. The action side is symmetrical but gated: the
+`entity-fixer` and `pattern-implementer` workers (see [Agents](#agents)) run only when you invoke
+[`/fix-risks` or `/implement-patterns`](#commands) yourself — Claude never refactors on its own.
+Architecture deep dive in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Using `/audit`
 
-`/audit` resolves a **selector** against the glossary and zooms across the three layers —
+`/audit` resolves a **selector** against the glossary and zooms across three layers —
 **track → aspect → family / category / entity**:
 
-| Selector | Layer | Resolves to |
-| --- | --- | --- |
-| `/audit [scope]` | L1 (full) | **both tracks in parallel**, one unified report |
-| `/audit risks` | L2 track | RISK track only (alias: `/audit risk-scan`) |
-| `/audit patterns` | L2 track | PATTERN track — both aspects (scan + fit) |
-| `/audit pattern-scan` | aspect | design patterns **already present** |
-| `/audit pattern-fit` | aspect | **most-suitable** pattern suggestions |
-| `/audit <category>` | entities | one category (e.g. `vulnerability`, `design-pattern`) |
-| `/audit <family>` | entities | one family (e.g. `oop`, `security`, `behavioral`) |
-| `/audit <entity-id>` | one entity | a single entity or pattern (e.g. `god-class`, `strategy`) |
+| Selector              | Layer      | Resolves to                                               |
+| --------------------- | ---------- | --------------------------------------------------------- |
+| `/audit [scope]`      | L1 (full)  | **both tracks in parallel**, one unified report           |
+| `/audit risks`        | L2 track   | RISK track only (alias: `/audit risk-scan`)               |
+| `/audit patterns`     | L2 track   | PATTERN track — both aspects (scan + fit)                 |
+| `/audit pattern-scan` | aspect     | design patterns **already present**                       |
+| `/audit pattern-fit`  | aspect     | **most-suitable** pattern suggestions                     |
+| `/audit <category>`   | entities   | one category (e.g. `vulnerability`, `design-pattern`)     |
+| `/audit <family>`     | entities   | one family (e.g. `oop`, `security`, `behavioral`)         |
+| `/audit <entity-id>`  | one entity | a single entity or pattern (e.g. `god-class`, `strategy`) |
 
 Each selector takes an optional **scope** suffix: `full` (default), `changed` (vs the base branch),
 or `component <path>` (a single subtree).
@@ -153,64 +139,70 @@ or `component <path>` (a single subtree).
 `oop` is the spine — it surfaces in every full audit whenever class/struct/interface declarations
 are present, and it is fixed before other families.
 
-## Taking action
+## Commands
 
-The `/audit` report hands off to two side-effecting commands. Both are `disable-model-invocation`
-(user-invoked only) and both are parallel and layered like the analysis side:
+The two **gated commands** are what the `/audit` report's **Recommended Actions** section prints —
+with real selectors and real paths — for you to run next. Both are `disable-model-invocation`
+(user-invoked only), and each is a thin front door that delegates to the matching action skill:
 
-| Command | What it does |
-| --- | --- |
-| `/fix-risks <selector> [scope]` | Fixes risk findings entity by entity via `entity-fixer` (OOP first), verified with the project's own detected commands |
-| `/implement-patterns <selector> [scope]` | Adopts suggested patterns via `pattern-implementer`, applied through a safe parallel-change sequence + tests |
+| Command                                  | Delegates to                          | What it does                                                                                  |
+| ---------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `/fix-risks <selector> [scope]`          | [`/improve`](#skills) skill           | Fixes risk findings entity by entity (OOP first) via `entity-fixer`                           |
+| `/implement-patterns <selector> [scope]` | [`/pattern-implement`](#skills) skill | Adopts a suggested pattern via `pattern-implementer`, through a safe parallel-change sequence |
 
-Run them straight from the **Recommended Actions** section at the end of an audit — the report
-prints them with real selectors and real paths.
+Both run the **project's own detected** test/typecheck/lint command (e.g. `npm test`, `pytest`,
+`make test`, `go test ./...`) and verify each change before moving on — there is no single-language
+tooling assumption. Add `--plan-only` to either to preview the change set without writing.
 
-## Lookups & agents
+## Skills
 
-Two read-only lookup skills back the work:
+Five skills make up the user-facing surface — three for analysis and lookup, two for action:
 
-| Skill | What it does |
-| --- | --- |
-| `glossary` | Resolve any entity by id, list a family or category, or follow cross-references. Catalog: `skills/glossary/PATTERNS.md`. |
-| `onboarding` | In-session orientation — mental model, analyze → act flow, what to run next. |
+| Skill                | Kind     | What it does                                                                                                             |
+| -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `/audit`             | analysis | The read-only analysis front door — see [Using `/audit`](#using-audit) for the selector grammar.                         |
+| `/glossary`          | lookup   | Resolve any entity by id, list a family or category, or follow cross-references. Catalog: `skills/glossary/PATTERNS.md`. |
+| `/onboarding`        | lookup   | In-session orientation — mental model, analyze → act flow, what to run next.                                             |
+| `/improve`           | action   | The FIX action: smallest corrective refactor per issue entity. Backs `/fix-risks`.                                       |
+| `/pattern-implement` | action   | The IMPLEMENT action: adopt one design pattern safely. Backs `/implement-patterns`.                                      |
+
+The two **action** skills modify source, so like the commands that wrap them they are
+`disable-model-invocation` (user-invoked only) and never auto-fire.
+
+## Agents
 
 Six agents do the work — one orchestrator and five generic glossary-driven workers. No per-domain
 scanner files:
 
-| Agent | Role |
-| --- | --- |
-| `oop-orchestrator` | Resolves the selection across both tracks and fans out workers in parallel into one unified report |
-| `entity-detector` | Detect one issue entity (read-only) |
-| `pattern-scanner` | Detect one design pattern already present (read-only) |
-| `pattern-suggester` | Evaluate fit for one design pattern (read-only) |
-| `entity-fixer` | Fix one issue entity, verified with the project's own detected commands |
-| `pattern-implementer` | Implement one pattern via a safe parallel-change sequence + tests |
+| Agent                 | Role                                                                                               |
+| --------------------- | -------------------------------------------------------------------------------------------------- |
+| `oop-orchestrator`    | Resolves the selection across both tracks and fans out workers in parallel into one unified report |
+| `entity-detector`     | Detect one issue entity (read-only)                                                                |
+| `pattern-scanner`     | Detect one design pattern already present (read-only)                                              |
+| `pattern-suggester`   | Evaluate fit for one design pattern (read-only)                                                    |
+| `entity-fixer`        | Fix one issue entity, verified with the project's own detected commands                            |
+| `pattern-implementer` | Implement one pattern via a safe parallel-change sequence + tests                                  |
 
 Adding a new entity? See [docs/EXTENDING.md](docs/EXTENDING.md) — append to the glossary, no new
 agent file needed.
 
-## Notes
+## Uninstall
 
-- `/audit` is read-only end to end; it never modifies code. Review its unified report — and the
-  **Recommended Actions** it prints — before running a gated action command.
-- The audit → action hand-off is explicit: `/audit` prints the exact `/fix-risks` and
-  `/implement-patterns` commands (with real selectors and scopes) to run next.
-- `/fix-risks` and `/implement-patterns` run the project's **own detected** test/typecheck/lint
-  command (e.g. `npm test`, `pytest`, `make test`, `go test ./...`) and verify each change before
-  moving on — there is no single-language tooling assumption.
+Remove the plugin, then (optionally) drop the marketplace it came from:
 
-## Further reading
+```text
+/plugin uninstall claude-oop-excellence@odere-pro
+/plugin marketplace remove odere-pro          # optional: also forget the marketplace
+```
 
-| Doc | Topic |
-| --- | --- |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Deep dive on the L1/L2/L3 model, orchestrator fan-out, standalone-worker contract, retired agents |
-| [docs/EXTENDING.md](docs/EXTENDING.md) | How to add a new entity to the glossary — full field reference + validation |
-| [docs/LANGUAGE-COVERAGE.md](docs/LANGUAGE-COVERAGE.md) | Why principle-based, what's exercised, how verification uses your project's own tooling |
-| [docs/RELEASING.md](docs/RELEASING.md) | Release process for plugin authors |
+You can also manage both from the interactive `/plugin` menu. If you loaded it locally with
+`--plugin-dir`, just relaunch `claude` without that flag — there is nothing to uninstall. The plugin
+ships no hooks and no MCP server, so removing it leaves no background state behind.
 
 ---
 
 <p align="center">
-  <a href="https://odere-pro.github.io/claude-oop-excellence/">Claude OOP Excellence landing page</a>
+  <a href="https://odere-pro.github.io/claude-oop-excellence/">Landing page</a>
+  &nbsp;·&nbsp;
+  <a href="docs/RELEASING.md">Releasing</a>
 </p>
