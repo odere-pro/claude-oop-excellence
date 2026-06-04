@@ -6,6 +6,28 @@ All notable changes to this plugin are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-04
+
+### Changed
+
+- **Family-batched audit fan-out — `/audit` is now much faster.** The read path of the orchestrator
+  (`oop-orchestrator`) dispatches **one worker per in-scope family** instead of one per entity: each
+  `entity-detector` / `pattern-scanner` reads the scope **once** and checks every entity in its
+  family in that pass. The pattern track folds its two read passes into a single `pattern-scanner`
+  per family with a new **lens** (`scan` | `fit` | `both`, default `scan`) — lens `both` answers
+  "already present?" and "would it help?" in one read, so `pattern-suggester` is no longer dispatched
+  alongside it in a full audit (it remains the standalone `pattern-fit` worker). Net effect: a full
+  audit drops from ~159 worker dispatches to ≈15 family workers — one or two concurrent waves instead
+  of ~10, with no redundant per-entity re-reads. Oversized families (> ~8 entities) split into two
+  concurrent batches as a turn-budget valve.
+- **Workers are now hybrid (id _or_ family).** The three read workers (`entity-detector`,
+  `pattern-scanner`, `pattern-suggester`) accept either a single entity record/id (the existing
+  standalone-by-id contract, unchanged) or a whole family batch. A standalone **family name**
+  self-resolves to that family's record set.
+- The **action** workers (`entity-fixer`, `pattern-implementer`) intentionally **stay per-entity** so
+  each write is isolated and independently verified — only the read/audit path is batched. Docs
+  (`ARCHITECTURE.md`, `EXTENDING.md`, README, `audit` skill) updated to describe per-family fan-out.
+
 ### Fixed
 
 - README accuracy and structure. Corrected the surface description: the plugin ships **five skills**

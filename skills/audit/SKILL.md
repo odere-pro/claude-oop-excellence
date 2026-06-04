@@ -5,8 +5,8 @@ description: >-
   codebase's quality, risk, and design. The one analysis front door. Reads the glossary to resolve a
   selector that zooms across three layers — track, aspect, family/category/entity — then delegates to
   the oop-orchestrator in analyze mode (both the RISK track and the PATTERN track in parallel) or a
-  narrower mode for a track/aspect selector. The orchestrator fans out one worker per in-scope entity
-  in parallel, batched by family, and returns ONE unified report: risk findings (matrix, hotspots,
+  narrower mode for a track/aspect selector. The orchestrator fans out one worker per in-scope family
+  in parallel — each reads the scope once and checks its whole family — and returns ONE unified report: risk findings (matrix, hotspots,
   correlations, score), Patterns Present, Pattern Opportunities, and a Recommended Actions handoff
   printing the exact gated commands to run next. Language-agnostic; select by track, aspect, category,
   family, or entity id, in any scope.
@@ -148,8 +148,12 @@ Pass a prompt containing the mode, the selector, and the scope, for example:
 
 The `oop-orchestrator` reads the glossary, resolves the selector to the in-scope entities per track,
 applies each entity's `applies_when` smart-dispatch check (explicit selectors override skips),
-dispatches **one worker per entity in parallel, batched by family**, then deduplicates, computes the
-weighted risk score, and detects cross-domain correlations. The whole analysis path is read-only.
+dispatches **one worker per family in parallel** — each worker reads the scope once and checks its
+whole family, and in a full audit the pattern track uses a single `pattern-scanner` per family (lens
+`both`) so one read yields both Patterns Present and Pattern Opportunities — then deduplicates,
+computes the weighted risk score, and detects cross-domain correlations. Family-batched fan-out is
+what keeps a full audit fast (≈15 workers instead of one per entity). The whole analysis path is
+read-only.
 
 ### 4. Return the unified report
 
