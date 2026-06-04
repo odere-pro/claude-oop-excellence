@@ -10,7 +10,10 @@ directory under here ships to users when the plugin is installed.
 ## What ships
 
 - `.claude-plugin/plugin.json` — the manifest (version of record)
-- `.claude-plugin/marketplace.json` — single-plugin marketplace (`source: "./"`); omits `version`
+
+This repo no longer ships its own `marketplace.json`. Distribution is via the external
+[`odere-pro`](https://github.com/odere-pro/claude-software-3-0-marketplace) aggregator marketplace,
+which lists this plugin by `github` source — install with `claude-oop-excellence@odere-pro`.
 - `skills/glossary/` — the canonical glossary (`glossary.json`, single source of truth for all 102
   entities + shared vocabulary including the `vocabulary.tracks` / `vocabulary.aspects` selector
   registry) and its lookup `SKILL.md`, plus the relocated patterns catalog docs (`PATTERNS.md`,
@@ -54,7 +57,7 @@ This plugin ships no `hooks/` and no `.mcp.json` — it has no event hooks and n
 
 | Path                   | Role                         | Ships? |
 | ---------------------- | ---------------------------- | ------ |
-| `.claude-plugin/`      | manifest + marketplace       | yes    |
+| `.claude-plugin/`      | plugin manifest              | yes    |
 | `skills/`, `commands/` | user/Claude-invokable skills | yes    |
 | `agents/`              | worker subagents             | yes    |
 | `.claude/`             | dev-repo project config      | no     |
