@@ -88,27 +88,30 @@ flowchart TD
     P --> PS
     P --> PF
   end
-  subgraph L3 [L3 · workers, one per in-scope entity, parallel]
-    WD[entity-detector]
-    WS[pattern-scanner]
-    WF[pattern-suggester]
+  subgraph L3 [L3 · workers, one per in-scope family, parallel]
+    WD[entity-detector<br/>per issue family]
+    WS[pattern-scanner<br/>per pattern family · lens both]
   end
   A --> R
   A --> P
   R --> WD
   PS --> WS
-  PF --> WF
+  PF --> WS
   WD --> U[ONE unified report]
   WS --> U
-  WF --> U
   U --> RA[Recommended Actions<br/>prints exact gated commands]
   RA -. gated, user-invoked .-> ACT[/fix-risks &nbsp; · &nbsp; /implement-patterns/]
 ```
 
-The diagram is the **read-only analysis flow**. The action side is symmetrical but gated: the
-`entity-fixer` and `pattern-implementer` workers (see [Agents](#agents)) run only when you invoke
-[`/fix-risks` or `/implement-patterns`](#commands) yourself — Claude never refactors on its own.
-Architecture deep dive in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+The diagram is the **read-only analysis flow**. Workers fan out **one per in-scope family** — each
+reads the scope once and checks its whole family, so a full audit runs ≈15 family workers in parallel
+rather than one per entity. In a full audit the pattern track uses a single `pattern-scanner` per
+family with **lens `both`**, answering "already present?" and "would it help?" in one read;
+`pattern-suggester` backs the standalone `/audit pattern-fit`. The action side is symmetrical but
+gated and stays **per-entity**: the `entity-fixer` and `pattern-implementer` workers (see
+[Agents](#agents)) run only when you invoke [`/fix-risks` or `/implement-patterns`](#commands)
+yourself — Claude never refactors on its own. Architecture deep dive in
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Using `/audit`
 

@@ -26,9 +26,13 @@ directory under here ships to users when the plugin is installed.
 - `agents/` — an `oop-orchestrator` (formerly `risk-scanner`) with an `analyze` super-mode that
   drives both tracks, plus five generic glossary-driven workers (`entity-detector`, `entity-fixer`,
   `pattern-scanner`, `pattern-suggester`, `pattern-implementer`), least-privilege `tools`. The
-  orchestrator selects in-scope entities from the glossary, fans the workers out per entity in
-  parallel, and closes the audit → action handoff (Recommended Actions emit the gated `/fix-risks` /
-  `/implement-patterns`). The `pattern-detect` skill and the eight hardcoded
+  orchestrator selects in-scope entities from the glossary and fans the **read** workers out **per
+  family** in parallel (each reads the scope once and checks its whole family; a full audit ≈ 15 family
+  workers, not ~159 per-entity ones — the pattern track uses one `pattern-scanner` per family with lens
+  `both`, folding scan + fit into one read). The **action** workers (`entity-fixer`,
+  `pattern-implementer`) stay **per-entity** for change isolation. Workers are **hybrid**: a single
+  entity id/record or a whole family batch. It closes the audit → action handoff (Recommended Actions
+  emit the gated `/fix-risks` / `/implement-patterns`). The `pattern-detect` skill and the eight hardcoded
   `risk-antipattern-*-scanner` leaf agents are retired — their knowledge now lives in the glossary.
 
 This plugin ships no `hooks/` and no `.mcp.json` — it has no event hooks and no MCP server.

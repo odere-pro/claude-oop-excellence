@@ -3,7 +3,9 @@
 Adding a new entity — a code smell, antipattern, vulnerability, supply-chain risk, or design
 pattern — does **not** require writing a new agent or scanner file. The generic workers
 (`entity-detector`, `pattern-scanner`, `pattern-suggester`, `entity-fixer`, `pattern-implementer`)
-are glossary-driven: they read the entity's record at runtime and act on it.
+are glossary-driven: they read the entity's record at runtime and act on it. A new record is picked
+up automatically — a full audit batches it into its **family** worker, and you can target it directly
+with `/audit <your-entity-id>`. No fan-out wiring to touch.
 
 ## How to add an entity
 

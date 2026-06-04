@@ -15,7 +15,7 @@ down to a single entity without learning a second command.
 | --- | --- |
 | **L1 — front door** | `/audit` resolves the selector against `skills/glossary/glossary.json` (single source of truth: entities + shared vocabulary) |
 | **L2 — tracks & aspects** | RISK track (antipatterns, code smells, vulnerabilities, supply-chain risks) and PATTERN track with two aspects — **scan** (patterns already present) and **fit** (most-suitable suggestions) |
-| **L3 — workers** | One generic worker instance per in-scope entity, fanned out in parallel, batched by family: `entity-detector`, `pattern-scanner`, `pattern-suggester` |
+| **L3 — workers** | One generic worker instance per in-scope **family**, fanned out in parallel — each reads the scope once and checks its whole family: `entity-detector`, `pattern-scanner` (lens `scan`/`fit`/`both`), `pattern-suggester` |
 
 The action layer is downstream of L3 and **gated** — Claude never refactors on its own. The report
 closes with a **Recommended Actions** handoff that prints the exact
@@ -26,17 +26,29 @@ real findings. Both action commands are `disable-model-invocation`; only you can
 
 `oop-orchestrator` reads the glossary, resolves the caller's selection through the
 **track → aspect → family/category/entity** layers, applies each entity's `applies_when`
-smart-dispatch check, and fans out **one generic worker instance per in-scope entity** — always in
-parallel, batched by family — then deduplicates, scores, and correlates into one unified report. In
-a full audit it runs the RISK track and the PATTERN track concurrently. The workers are
-glossary-driven: the entity's full record is injected into each worker prompt.
+smart-dispatch check, and — for the read modes — fans out **one generic worker instance per in-scope
+family**, always in parallel. Each worker reads the scope once and checks every entity in its family,
+then the orchestrator deduplicates, scores, and correlates into one unified report. In a full audit
+it runs the RISK track (one `entity-detector` per issue family) and the PATTERN track (one
+`pattern-scanner` per pattern family with lens `both` — presence *and* fit in a single read)
+concurrently. The workers are glossary-driven: the family's full record set is injected into each
+worker prompt.
 
-## Standalone-worker contract (single-entity direct dispatch)
+**Why per family:** a full audit has ~102 entities. One worker per entity (and the pattern track
+doubled into scan + fit) meant ~159 agent dispatches throttled by the harness concurrency cap into
+many waves, each redundantly re-reading the codebase. Batching by family — and merging the pattern
+scan + fit passes into one `pattern-scanner` (lens `both`) — collapses that to ≈15 workers in one or
+two waves, each reading the scope once. Oversized families (> ~8 entities) split into two concurrent
+batches. The **action** modes (`fix`, `pattern-implement`) stay **per-entity** so each write is
+isolated and independently verified.
 
-For single-entity work the orchestrator is **skippable**. The five workers run **standalone by id**:
-dispatched directly with just an entity id (no orchestrator, no injected record), each reads
+## Standalone-worker contract (direct dispatch — by id or by family)
+
+For focused work the orchestrator is **skippable**. The five workers run **standalone**: dispatched
+directly with just an entity **id** (no orchestrator, no injected record), each reads
 `skills/glossary/glossary.json`, self-resolves the matching record, and runs identically to its
-orchestrator-driven path.
+orchestrator-driven path. The read workers also accept a **family name**, which self-resolves to that
+family's whole record set — the same family batch the orchestrator injects.
 
 See [`skills/audit/SKILL.md`](../skills/audit/SKILL.md) and
 [`skills/glossary/SKILL.md`](../skills/glossary/SKILL.md) for the full direct-access contract and
