@@ -6,6 +6,10 @@ All notable changes to this plugin are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Normalize to the odere-pro plugin conventions: canonical author (Oleksandr Derechei), README reshaped to the standard skeleton with a Privacy note, and the Install block fixed to the shared `odere-pro/claude-software-3-0-marketplace` registry (the old self-marketplace line was stale).
+
 ## [0.2.0] - 2026-06-04
 
 ### Changed
